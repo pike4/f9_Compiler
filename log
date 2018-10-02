@@ -1,0 +1,8 @@
+
+9/10/18:  Finished list of tokens. Reworked python scripts to accomodate changes. Fixed bugs in scripts
+9/11/18:  Worked on tokenizer. Did not finish symbol lookup for specific built-ins. Hex numbers and variables names are unfinished
+
+9/17/18:  Finished tokenization for all built-in functions, variable names, hex numbers
+9/18/18:  Fixed bugs relating to hex numbers, string literals, and numeric literals followed by an identifier with no space in between
+
+9/24/18:  Implemented error messages with relevant line and column number
