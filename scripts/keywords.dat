@@ -1,0 +1,9 @@
+if LEX_IF
+else LEX_ELSE
+while LEX_WHILE
+for LEX_FOR
+print LEX_PRINT
+int LEX_INT
+program LEX_PROGRAM
+exit LEX_EXIT
+read LEX_READ
