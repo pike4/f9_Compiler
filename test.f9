@@ -1,6 +1,0 @@
-program {
-	int x;
-	x = 4;
-	print(x)
-	print("\n")
-}
