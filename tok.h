@@ -21,3 +21,9 @@ struct state
 
 // The table defining the FSM
 struct state states[NUM_STATES][257];
+
+
+struct tok getToken();
+
+extern struct tok curTok;
+extern int curType;

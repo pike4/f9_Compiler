@@ -2,9 +2,13 @@
 	
 */
 
-program main()
+1+1*2 && 7*8
+
+program
 {
-	int _test_val = 0;
+	int _test_val, hello, woo;
+	int should_err, probably;
+	
 	while(i < 200)
 	{
 		print("\"hello\"\n");

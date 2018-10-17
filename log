@@ -6,3 +6,10 @@
 9/18/18:  Fixed bugs relating to hex numbers, string literals, and numeric literals followed by an identifier with no space in between
 
 9/24/18:  Implemented error messages with relevant line and column number
+
+10/07/18: Write up grammar for most of F9
+
+10/14/18: Implemented some background functions for parsing
+
+10/16/18: Implemented parsing for many parts of f9
+10/17/18: Finished implementing parsing for most terms

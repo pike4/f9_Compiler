@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tokens.h"
-#include "tok.h"
-#include "states.h"
-#include "actions.h"
-#include "keywords.h"
 
-extern void makeFSM();
+#include "compiler.h"
+
 char nextChar;
 
 int col = 0, line = 0;
@@ -115,7 +111,8 @@ struct tok getToken()
 				{
 					ret.tok_val = toDec(ret);
 				}
-
+				curTok = ret;
+				curType = ret.tok_type;
 				return ret;
 			case FSM_ACT_SAVE:
 				getch();
@@ -138,6 +135,8 @@ struct tok getToken()
 				getch();
 				ret.tok_str[0] = ch;
 				ret.tok_str[1] = '\0';
+				curTok = ret;
+				curType = ret.tok_type;
 				return ret;
 
 			case FSM_ACT_ARET:
@@ -149,6 +148,8 @@ struct tok getToken()
 
 				ret.tok_str[tokLen++] = ch;
 				ret.tok_str[tokLen++] = '\0';
+				curTok = ret;
+				curType = ret.tok_type;
 				return ret;
 
 			case FSM_ACT_ERR:
@@ -163,30 +164,3 @@ struct tok getToken()
 	}	
 }
 
-int main()
-{
-	makeFSM();
-
-	printf("FSM Initialized\n");
-
-	nextChar = getchar();
-	
-	while(1) 
-	{
-		struct tok a = getToken();
-		printf("token: %s, string value: %s", tokens_names[a.tok_type], &a.tok_str[0]);
-		printf("\n");
-		printf("at line: %d, col %d\n\n", line, col);
-		if(a.tok_type == LEX_NUM)
-		{
-			printf(" int value: %d", a.tok_val);
-		}
-		
-		if(nextChar == EOF) {
-			break;
-		}
-		if(a.tok_type == LEX_EOF) {
-			break;
-		}
-	}
-}
