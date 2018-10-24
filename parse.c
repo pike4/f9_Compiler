@@ -16,6 +16,12 @@ void parseAssert(int tokType)
 	}
 }
 
+void parseEat(int tokType)
+{
+	parseAssert(tokType);
+	getToken();
+}
+
 void parseAll()
 {
 	printf("parsepgm\n");
@@ -28,15 +34,14 @@ void parseAll()
 	{
 		parseErr(LEX_EOF);
 	}
+	printf("done\n");
 }
 
 void parsePgm()
 {
-	parseAssert(LEX_PROGRAM);
-	getToken();
+	parseEat(LEX_PROGRAM);
 
-	parseAssert(LEX_LBRACK);
-	getToken();
+	parseEat(LEX_LBRACK);
 	parseDecls();
 
 	parseStmts();
@@ -52,30 +57,30 @@ void parseDecls()
 
 void parseDecl()
 {
-	parseAssert(LEX_INT);
+	parseEat(LEX_INT);
 	printf("decl\n");
-	getToken();
-	parseAssert(LEX_IDENT);
-	getToken();
+	parseEat(LEX_IDENT);
 	while(curTok.tok_type == LEX_COMMA)
 	{
 		printf("comma decls\n");
 		getToken();
-		parseAssert(LEX_IDENT);
-		getToken();
+		parseEat(LEX_IDENT);
 	}
 
-	parseAssert(LEX_SEMICOLON);
-	getToken();
+	parseEat(LEX_SEMICOLON);
 }
 
 void parseStmts()
 {
-	int cur = curTok.tok_type;
+	printf("parseStmts\n");
 
-	while(cur == LEX_IF 
-			|| cur == LEX_WHILE
-			|| cur == LEX_IDENT )
+	printf("stmts starting with: %s\n", curTok.tok_str); 
+
+	while(curType == LEX_IF 
+			|| curType == LEX_WHILE
+			|| curType == LEX_IDENT 
+			|| curType == LEX_PRINT
+			|| curType == LEX_EXIT)
 	{
 		parseStmt();
 	}
@@ -83,71 +88,118 @@ void parseStmts()
 
 void parseStmt()
 {
-	
+	if(curType == LEX_IF)
+	{
+		printf("parse if\n");
+		parseIf();
+	}
+
+	else if(curType == LEX_WHILE)
+	{
+		printf("parse while\n");
+		parseWhile();
+	}
+
+	else if(curType == LEX_IDENT)
+	{
+		printf("parse ident\n");
+		parseAssn();
+	}
+
+	else if(curType == LEX_PRINT
+		|| curType == LEX_EXIT)
+	{
+		printf("parse call\n");
+		parseCall();
+	}
 }
 
-void parseIter()
+void parseWhile()
 {
-	parseAssert(LEX_WHILE);
-	getToken();
-	parseAssert(LEX_LPAREN);
-	getToken();
+	printf("parseWhile\n");
+	parseEat(LEX_WHILE);
+	parseEat(LEX_LPAREN);
 	
-	parseStmts();
+	parseExpr();
 
-	parseAssert(LEX_RPAREN);
-
-	parseAssert(LEX_LBRACK);
-	getToken();
+	parseEat(LEX_RPAREN);
+	parseEat(LEX_LBRACK);
 		
 	parseStmts();
 	
-	parseAssert(LEX_RBRACK);
+	parseEat(LEX_RBRACK);
+	printf("whileDone\n");
 }
 
 void parseIf()
 {
 	// Parse condition
-	parseAssert(LEX_IF);
-	getToken();
-	parseAssert(LEX_LPAREN);
-	getToken();
+	parseEat(LEX_IF);
+	parseEat(LEX_LPAREN);
 	parseExpr();
-	parseAssert(LEX_RPAREN);
-	getToken();
+	parseEat(LEX_RPAREN);
 
 	// Parse If Body
-	parseAssert(LEX_LBRACK);
-	getToken();
+	parseEat(LEX_LBRACK);
 	parseStmts();
-	parseAssert(LEX_RBRACK);
-	getToken();
+	parseEat(LEX_RBRACK);
 
 	// Optional else statement
 	if(curType == LEX_ELSE)
 	{
 		getToken();
-		parseAssert(LEX_LBRACK);
-		getToken();
+		parseEat(LEX_LBRACK);
 		parseStmts();
-		parseAssert(LEX_RBRACK);
-		getToken();
+		parseEat(LEX_RBRACK);
 	}
 }
 
 void parseAssn()
 {
+	getToken();
+	
+	switch(curType)
+	{
+		case LEX_EQ:
+		case LEX_PLEQ:	
+		case LEX_MINEQ:
+		case LEX_MULEQ:
+		case LEX_DIVEQ:
+			getToken();
+			break;
+		default:
+			printf("%s\n", curTok.tok_str);
+			printf("Error: expected assignment statement\n");
+			exit(-1);
+	}
 
+	parseExpr();
+
+	parseEat(LEX_SEMICOLON);
 }
 
 void parseCall()
 {
+	if(curType == LEX_PRINT)
+	{
+		printf("parsePrint\n");
+		getToken();
+		parseEat(LEX_LPAREN);
+		parseEat(LEX_STRING);
+		parseEat(LEX_RPAREN);
+	}
 
+	else if(curType == LEX_EXIT)
+	{
+		getToken();
+		parseEat(LEX_LPAREN);
+		parseEat(LEX_RPAREN);
+	}
+	parseEat(LEX_SEMICOLON);
 }
 
 void parseExpr()
 {
-	printf("expr in RPN:\n(");
 	parseComp();
 	if(curTok.tok_type == LEX_AND
 		|| curTok.tok_type == LEX_OR)
@@ -156,12 +208,10 @@ void parseExpr()
 		getToken();
 		parseComp();
 	}
-	printf(")");
 }
 
 void parseComp()
 {
-	printf("(");
 	parseAddn();
 	if(curTok.tok_type == LEX_LT
 		|| curTok.tok_type == LEX_GT
@@ -173,12 +223,10 @@ void parseComp()
 		getToken();
 		parseAddn();
 	}
-	printf(")");
 }
 
 void parseAddn()
 {
-	printf("(");
 	parseMuln();
 	if(curTok.tok_type == LEX_PLUS
 		|| curTok.tok_type == LEX_MIN)
@@ -187,12 +235,10 @@ void parseAddn()
 		getToken();
 		parseMuln();
 	}
-	printf(")");
 }
 
 void parseMuln()
 {
-	printf("(");
 	parseTerm();
 	if(curTok.tok_type == LEX_MUL
 		|| curTok.tok_type == LEX_DIV)	
@@ -201,12 +247,10 @@ void parseMuln()
 		getToken();
 		parseTerm();
 	}
-	printf(")");
 }
 
 void parseTerm()
 {
-	printf("(");
 	if(curType == LEX_IDENT 
 		|| curType == LEX_NUM
 	)
@@ -218,11 +262,8 @@ void parseTerm()
 
 	else
 	{
-		parseAssert(LEX_LPAREN);
-		getToken();
+		parseEat(LEX_LPAREN);
 		parseExpr();
-		parseAssert(LEX_RPAREN);
-		getToken();
+		parseEat(LEX_RPAREN);
 	}
-	printf(")");
 }

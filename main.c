@@ -22,8 +22,6 @@ int main()
 	nextChar = getchar();
 
 	printf("parseing\n");
-	getToken();
-	parseExpr();
 	parseAll();
 	
 /*	while(1) 
