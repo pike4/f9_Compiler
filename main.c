@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <assert.h>
+
+#include "hash.h"
 
 extern int col, line;
 extern char nextChar;
@@ -15,8 +19,9 @@ int curType;
 
 int main()
 {
+	hashInit();
 	makeFSM();
-
+	
 	printf("FSM Initialized\n");
 
 	nextChar = getchar();
