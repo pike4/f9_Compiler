@@ -1,4 +1,4 @@
-#include "compiler.h"
+#include "hash.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,6 +28,7 @@ int hash(char* key)
 
 int getSize(int type)
 {
+	struct structDef* temp = structsByType[type];
 	switch(type)
 	{
 		case TYPE_INT:
@@ -37,6 +38,8 @@ int getSize(int type)
 		case TYPE_STR:
 			return sizeof(char*);
 		default:
+			if(temp != 0)
+				return temp->size;
 			return 0;
 	}
 }
@@ -86,7 +89,6 @@ void hashInsert(struct listEnt** table, char* key, void* val)
 // Get the value of the given key
 void* hashGet(struct listEnt** table, char* key)
 {
-
 	int h = hash(key);
 	struct listEnt* cur = table[h];
 
@@ -101,11 +103,11 @@ void* hashGet(struct listEnt** table, char* key)
 
 	return 0;
 }
-/*
+
 
 void addVar(char* key, int val)
 {
-	struct varDef* newVar = malloc(sizeof(varDef));
+	struct varDef* newVar = malloc(sizeof(struct varDef));
 	newVar->type = val;
 	newVar->size = getSize(val);
 
@@ -114,20 +116,93 @@ void addVar(char* key, int val)
 
 int getVar(char* key)
 {
-	struct varDef* ret = (struct VarDef*) hashGet(vars, key);
+	struct varDef* ret = ((struct VarDef*) hashGet(vars, key));
 	
 	if(ret != 0)
-		return ret->val;
+		return ret->type;
 	return 0;
 }
 
 void addStruct(char* key, struct structDef* def)
 {
-	hashInsert(structs, key, (void*) def);
+	hashInsert(&structs[0], key, (void*) def);
 }
 
 struct structDef* getStruct(char* key)
 {
 	return hashGet(structs, key);
 }
-*/
+
+void addMember(struct structDef* s, char* name, int type)
+{
+	struct member* cur = s->members;
+
+	if(cur == 0)
+	{
+		cur = malloc(sizeof(struct member));
+		cur->name = strdup(name);
+		cur->def.type = type;
+		cur->def.size = getSize(type);
+		s->members = cur;
+		s->size += getSize(type);
+		return;
+	}
+
+	while(1)
+	{
+		if(cur->next == 0)
+		{
+			cur->next = malloc(sizeof(struct member));
+			cur->next->name = strdup(name);
+			cur->next->def.type = type;
+			cur->next->def.size = getSize(type);
+			s->size += getSize(type);
+			return;
+		}
+		
+		else cur = cur->next;
+	}
+}
+
+int getStructMember(int structType, char* name)
+{
+	struct structDef* s = structsByType[structType];
+	struct member* cur = s->members;
+
+	while(cur != 0)
+	{
+		if(!strcmp(name, cur->name))
+		{
+			return cur->def.type;
+		}
+		cur = cur->next;
+	}
+	return 0;
+}
+
+void printTypeByID(int type)
+{
+	switch(type)
+	{
+		case TYPE_UNDEF:
+			printf("undefined");
+			break;
+		case TYPE_INT:
+			printf("int");
+			break;
+		case TYPE_STR:
+			printf("string");
+			break;
+		case TYPE_CHAR:
+			printf("char");
+			break;
+		default:
+			printf("struct");
+	}
+}
+
+struct listEnt* vars[HASH_MAX];
+struct listEnt* structs[HASH_MAX];
+
+struct structDef* structsByType[HASH_MAX];
+int globalType = TYPE_CHAR + 1;

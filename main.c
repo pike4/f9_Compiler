@@ -6,12 +6,11 @@
 #include <time.h>
 #include <assert.h>
 
-extern int col, line;
-extern char nextChar;
+//extern char nextChar;
 
-struct tok curTok;
 int curType;
 
+//extern int line, col;
 int main()
 {
 	hashInit();

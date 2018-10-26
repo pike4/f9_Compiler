@@ -11,9 +11,14 @@
 #include "parse.h"
 #include "hash.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+extern char nextChar;
+extern struct tok curTok;
+extern int line, col;
 
 void makeFSM();
-
-extern int col, line;
 
 #endif

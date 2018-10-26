@@ -25,29 +25,39 @@ struct member
 {
 	char* name;
 	struct varDef def;
+	struct member* next;
 };
 
 struct structDef
 {
-	struct varDef* listEnt;
+	struct member* members;
 	int size;
+	int type;
 };
 
-extern void* vars[HASH_MAX];
-extern void* structs[HASH_MAX];
+extern struct listEnt* vars[HASH_MAX];
+extern struct listEnt* structs[HASH_MAX];
+extern struct structDef* structsByType[HASH_MAX];
 
-void hashInsert(struct listEnt** table, char* key, int val);
+extern int globalType;
+
+void hashInsert(struct listEnt** table, char* key, void* val);
 void* hashGet(struct listEnt** table, char* key);
 
 void addVar(char* key, int val);
 int getVar(char* key);
 
-void addStruct(char* key, struct structDef def)
+void addStruct(char* key, struct structDef* def);
 struct structDef* getStruct(char* key); 
+
+int getStructMember(int structType, char* name);
+
+void addMember(struct structDef* s, char* name, int type);
 
 int hash(char* key);
 
 void hashInit();
 
+void printTypeByID(int type);
 
 #endif

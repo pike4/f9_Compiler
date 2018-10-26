@@ -54,6 +54,10 @@ void makeFSM()
 	states[STATE_INIT][','].action = FSM_ACT_SRET;
 	states[STATE_INIT][','].value = LEX_COMMA;
 
+	states[STATE_INIT]['.'].nextState = STATE_INIT;
+	states[STATE_INIT]['.'].action = FSM_ACT_SRET;
+	states[STATE_INIT]['.'].value = LEX_DOT;
+
 	states[STATE_INIT]['>'].nextState = STATE_GT;
 	states[STATE_INIT]['>'].action = FSM_ACT_SAVE;
 	states[STATE_INIT]['>'].value = LEX_UNUSED;
@@ -136,7 +140,7 @@ void makeFSM()
 	for( i = 0; i < 256; i++)
 	{
 		states[STATE_SLASH][i].nextState = STATE_INIT;
-		states[STATE_SLASH][i].action = FSM_ACT_ERR;
+		states[STATE_SLASH][i].action = FSM_ACT_RET;
 		states[STATE_SLASH][i].value = LEX_DIV;
 	}
 

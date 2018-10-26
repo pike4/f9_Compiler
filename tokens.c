@@ -1,12 +1,13 @@
 #include "tokens.h"
 
-char* tokens_names[46] = 
+char* tokens_names[47] = 
 {
 	"LEX_UNUSED",
 	"LEX_INT_DECL",
 	"LEX_LBRACK",
 	"LEX_RBRACK",
 	"LEX_COMMA",
+	"LEX_DOT",
 	"LEX_SEMICOLON",
 	"LEX_IF",
 	"LEX_ELSE",

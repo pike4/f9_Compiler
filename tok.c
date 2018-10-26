@@ -6,6 +6,7 @@
 
 char nextChar;
 
+struct tok curTok;
 int col = 0, line = 0;
 
 // Get the next character and update the line numbers
@@ -166,4 +167,3 @@ struct tok getToken()
 		}
 	}	
 }
-

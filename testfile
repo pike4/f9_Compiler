@@ -1,6 +1,18 @@
 /* The initial program
 	
 */
+	struct myStruct {
+		int a, b, c;
+		int d;
+
+		char f;
+	};
+	
+	struct myStruct2 {
+		struct myStruct m1;
+		int size;
+	};
+
 
 program
 {
@@ -9,12 +21,8 @@ program
 	char aChar;
 	string aString, bString;
 
-	struct myStruct {
-		int a;
-		int b;
-
-		char f;
-	};
+	struct myStruct init1;
+	struct myStruct2 init2;
 	
 	while(i < 200)
 	{
@@ -22,7 +30,9 @@ program
 		// print("comment\n");
 	}
 	_test_val = 100;
-	i += -1;
+	i = init1.a + init2.m1.f * 100;
+	i = 100/10;
+	i += -1 * 100 + 2 + 2 +3 *8*8*8+100/20;
 	i -= 0x12A74AD;
 
 	aChar = '\n';

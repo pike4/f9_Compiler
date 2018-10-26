@@ -18,5 +18,7 @@ void parseWhile();
 void parseCall();
 void parseAssn();
 void parseStruct();
+void parsePreDecls();
+void parseStructInit();
 
 #endif
