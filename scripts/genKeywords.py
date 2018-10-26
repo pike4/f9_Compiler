@@ -1,8 +1,10 @@
 def makeKeywords():
     import sys
 
+
     inF = open("keywords.dat", "r")
     outF = open("../keywords.h", "w")
+    outF2 = open("../keywords.c", "w")
 
     outF.write("#include \"tokens.h\"\n")
 
@@ -30,23 +32,27 @@ def makeKeywords():
 
         line = inF.readline()
     outF.write("#define NUM_KEYWORDS " + str(count) + "\n\n")
+    outF.write("extern char* keywords[NUM_KEYWORDS];\n")
+    outF.write("extern int keywordCodes[NUM_KEYWORDS];")
 
-    outF.write("char *keywords[" + str(count) + "] = { ")
-
+    outF2.write("#include \"keywords.h\"\n\n")
+    outF2.write("char *keywords[" + str(count) + "] = { ")
     for i in range (0, count):
-        outF.write("\"" + names[i] + "\"")
+        outF2.write("\"" + names[i] + "\"")
         if(i < count - 1):
-            outF.write(", ")
+            outF2.write(", ")
 
-    outF.write("};\n")
+    outF2.write("};\n")
 
-    outF.write("int keywordCodes[" + str(count) + "] = { ")
+	# Write KeywordCodes array initialization to c file
+    outF2.write("int keywordCodes[" + str(count) + "] = { ")
     for i in range(0, count):
-        outF.write(vals[i])
+        outF2.write(vals[i])
         if(i < count - 1):
-            outF.write(",")
-    outF.write("};\n")
+            outF2.write(", ")
+    outF2.write("};\n")
 
 
     inF.close()
     outF.close()
+    outF2.close()

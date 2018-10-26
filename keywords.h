@@ -1,10 +1,5 @@
-#ifndef KEYWORDS
-#define KEYWORDS
-
 #include "tokens.h"
-#define NUM_KEYWORDS 9
+#define NUM_KEYWORDS 11
 
-extern char *keywords[9];
-extern int keywordCodes[9];
-
-#endif
+extern char* keywords[NUM_KEYWORDS];
+extern int keywordCodes[NUM_KEYWORDS];

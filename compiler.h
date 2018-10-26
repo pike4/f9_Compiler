@@ -1,3 +1,5 @@
+/* Global include file containing all common includes used throughout the compiler */
+
 #ifndef COMPILER
 #define COMPILER
 
@@ -7,6 +9,7 @@
 #include "actions.h"
 #include "keywords.h"
 #include "parse.h"
+#include "hash.h"
 
 #include <stdlib.h>
 #include <string.h>

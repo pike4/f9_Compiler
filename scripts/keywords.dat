@@ -7,3 +7,5 @@ int LEX_INT
 program LEX_PROGRAM
 exit LEX_EXIT
 read LEX_READ
+char LEX_CHARDEC
+string LEX_STRDEC

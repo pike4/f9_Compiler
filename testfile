@@ -5,23 +5,24 @@
 program
 {
 	int _test_val, hello, woo;
-	int should_err, probably;
+	int should_err, probably, i;
 	
 	while(i < 200)
 	{
 		print("\"hello\"\n");
 		// print("comment\n");
 	}
+	_test_val = 100;
 	i += -1;
 	i -= 0x12A74AD;
 
 	if ( i < 0)
 	{
-		exit();
+		exit(0);
 	}
 
 	else
 	{
-		print("all good\n");
+		print("all good\n", 1+1, "forU");
 	}
 }

@@ -3,15 +3,21 @@
 def makeDefs(inName, outName):
     import sys
 
-    outName2 = outName[:-1] + "c"
-   
+ 
+	#Open the files  
     inF = open(inName, 'r')
     outF = open(outName, 'w')
+
+	#Open a second file as a c file of the same base name
+    outName2 = outName[:-1] + "c"
     outF2 = open(outName2, 'w')
+
+	#Declarations
     cnt = 0
     names = []
 
  
+	#Remove leading directory from output file name
     while(outName[0] == '.' or outName[0] == '/'):
         outName = outName[1:]
     
@@ -24,6 +30,7 @@ def makeDefs(inName, outName):
             break
         line = line[:-1]
         names.append(line)
+        print("curLine: " + line)
         line = inF.readline()
         cnt = cnt + 1
 

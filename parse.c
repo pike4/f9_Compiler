@@ -59,12 +59,18 @@ void parseDecl()
 {
 	parseEat(LEX_INT);
 	printf("decl\n");
-	parseEat(LEX_IDENT);
+	parseAssert(LEX_IDENT);
+	hashInsert(curTok.tok_str, TYPE_INT);
+	getToken();
+
 	while(curTok.tok_type == LEX_COMMA)
 	{
 		printf("comma decls\n");
 		getToken();
-		parseEat(LEX_IDENT);
+
+		parseAssert(LEX_IDENT);
+		hashInsert(curTok.tok_str, TYPE_INT);
+		getToken();
 	}
 
 	parseEat(LEX_SEMICOLON);
@@ -156,11 +162,15 @@ void parseIf()
 
 void parseAssn()
 {
+	if(hashGet(curTok.tok_str) == 0)
+	{
+		printf("Error: varable %s undeclared\n", curTok.tok_str);
+		exit(-1);
+	}
 	getToken();
-	
 	switch(curType)
 	{
-		case LEX_EQ:
+		case LEX_ASSIGN:
 		case LEX_PLEQ:	
 		case LEX_MINEQ:
 		case LEX_MULEQ:
@@ -173,7 +183,15 @@ void parseAssn()
 			exit(-1);
 	}
 
-	parseExpr();
+	if(curType == LEX_READ)	
+	{
+		getToken();
+	}
+
+	else
+	{
+		parseExpr();
+	}
 
 	parseEat(LEX_SEMICOLON);
 }
@@ -185,7 +203,43 @@ void parseCall()
 		printf("parsePrint\n");
 		getToken();
 		parseEat(LEX_LPAREN);
-		parseEat(LEX_STRING);
+		
+		int argC = 0;
+		while(1)
+		{
+			argC++;
+			if(curType == LEX_STRING)
+			{
+				getToken();
+			}
+
+			else if(curType == LEX_IDENT
+				|| curType == LEX_NUM
+				|| curType == LEX_LPAREN)
+			{
+				parseExpr();
+			}
+
+			else
+			{
+				printf("Invalid function argument\n");
+				exit(-1);
+			}
+	
+			if(curType == LEX_COMMA)
+			{
+				getToken();
+			}
+
+			else break;
+		}
+
+		if(argC == 0)
+		{
+			printf("Error, print() must have at least one argument\n");
+			exit(-1);
+		}
+
 		parseEat(LEX_RPAREN);
 	}
 
@@ -193,6 +247,7 @@ void parseCall()
 	{
 		getToken();
 		parseEat(LEX_LPAREN);
+		parseExpr();
 		parseEat(LEX_RPAREN);
 	}
 	parseEat(LEX_SEMICOLON);
@@ -251,9 +306,18 @@ void parseMuln()
 
 void parseTerm()
 {
-	if(curType == LEX_IDENT 
-		|| curType == LEX_NUM
-	)
+	if( curType == LEX_IDENT )
+	{
+		if(hashGet(curTok.tok_str) == 0) {
+			printf("Error: undeclared variable %s\n", curTok.tok_str);
+			exit(-1);
+		}
+		printf("%s", curTok.tok_str);
+		getToken();
+		return;
+	}
+
+	else if( curType == LEX_NUM )
 	{
 		printf("%s", curTok.tok_str);
 		getToken();

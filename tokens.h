@@ -39,6 +39,9 @@
 #define LEX_NEWLINE 38
 #define LEX_EOF 39
 #define LEX_STRING 40
-#define NUM_TOKENS 41
+#define LEX_CHAR 41
+#define LEX_CHARDEC 42
+#define LEX_STRDEC 43
+#define NUM_TOKENS 44
 
-char* tokens_names[42];
+char* tokens_names[45];

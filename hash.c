@@ -29,8 +29,6 @@ void hashInsert(char* key, int val)
 {
 	int h = hash(key);
 
-	printf("hash of %s is %d\n", key, h);
-
 	struct listEnt* cur = table[h];
 	struct listEnt* newEnt = malloc(sizeof(struct listEnt));
 
@@ -73,8 +71,6 @@ int hashGet(char* key)
 {
 
 	int h = hash(key);
-	printf("hash of %s is: %d\n", key, h);
-
 	struct listEnt* cur = table[h];
 
 	while(cur != 0)
