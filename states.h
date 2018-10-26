@@ -19,6 +19,9 @@
 #define STATE_OR 18
 #define STATE_QUOTE 19
 #define STATE_ESCAPE 20
-#define NUM_STATES 21
+#define STATE_CHAR 21
+#define STATE_CHAR_END 22
+#define STATE_CHAR_ESC 23
+#define NUM_STATES 24
 
-char* states_names[22];
+char* states_names[25];

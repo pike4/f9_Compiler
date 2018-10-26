@@ -1,6 +1,6 @@
 #include "states.h"
 
-char* states_names[22] = 
+char* states_names[25] = 
 {
 	"STATE_INIT",
 	"STATE_SLASH",
@@ -23,5 +23,8 @@ char* states_names[22] =
 	"STATE_OR",
 	"STATE_QUOTE",
 	"STATE_ESCAPE",
+	"STATE_CHAR",
+	"STATE_CHAR_END",
+	"STATE_CHAR_ESC",
 	"NUM_STATES"
 };

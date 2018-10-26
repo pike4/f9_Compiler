@@ -1,6 +1,6 @@
 #include "tokens.h"
 
-char* tokens_names[45] = 
+char* tokens_names[46] = 
 {
 	"LEX_UNUSED",
 	"LEX_INT_DECL",
@@ -46,5 +46,6 @@ char* tokens_names[45] =
 	"LEX_CHAR",
 	"LEX_CHARDEC",
 	"LEX_STRDEC",
+	"LEX_STRUCT",
 	"NUM_TOKENS"
 };

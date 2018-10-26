@@ -1,3 +1,6 @@
+#ifndef TOK_H
+#define TOK_H
+
 #define MAX_TOK 50
 #define MEOF 256
 
@@ -27,3 +30,5 @@ struct tok getToken();
 
 extern struct tok curTok;
 extern int curType;
+
+#endif

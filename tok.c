@@ -8,6 +8,7 @@ char nextChar;
 
 int col = 0, line = 0;
 
+// Get the next character and update the line numbers
 void getch()
 {
 	nextChar = getchar();
@@ -19,6 +20,7 @@ void getch()
 	}
 }
 
+// True if the given token is a hex number
 int isHexNum(struct tok num)
 {
 	if(num.tok_type == LEX_NUM &&
@@ -29,6 +31,7 @@ int isHexNum(struct tok num)
 	else return 0;
 }
 
+// Convert the given token to its integer value
 int toDec(struct tok num)
 {
 	int ret = 0;

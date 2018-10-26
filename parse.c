@@ -8,6 +8,12 @@ void parseErr(int tokType)
 	exit(-1);
 }
 
+void errMsg(char* msg)
+{
+	printf("Error at line %d, col %d: %s\n", line, col, msg);
+	exit(-1);
+}
+
 void parseAssert(int tokType)
 {
 	if(curTok.tok_type != tokType)
@@ -49,31 +55,91 @@ void parsePgm()
 
 void parseDecls()
 {
-	while(curTok.tok_type == LEX_INT)
+	while(curTok.tok_type == LEX_INT
+		|| curType == LEX_CHARDEC
+		|| curType == LEX_STRDEC
+		|| curType == LEX_STRUCT)
 	{
 		parseDecl();
 	}
 }
 
+// Parse one line of variable declarations
 void parseDecl()
 {
-	parseEat(LEX_INT);
-	printf("decl\n");
+	// Determine the variable type the current line
+	
+	int type, rOpt1, rOpt2;
+	switch(curType)
+	{
+		case LEX_INT:
+			type = TYPE_INT;
+			rOpt1 = rOpt2 = LEX_NUM;
+			break;
+		case LEX_CHARDEC:
+			type = TYPE_CHAR;
+			rOpt1 = LEX_CHAR;
+			rOpt2 = LEX_NUM;
+			break;
+		case LEX_STRDEC:
+			type = TYPE_STR;
+			rOpt1 = rOpt2 = LEX_STRING;
+			break;
+		case LEX_STRUCT:
+			parseStruct();
+			return;
+		default:
+			errMsg
+			("missing type specifier - int assumed. Note: f9++ does not support default-int\n");
+	}
+
+	parseEat(curType);
 	parseAssert(LEX_IDENT);
-	hashInsert(curTok.tok_str, TYPE_INT);
+	hashInsert(curTok.tok_str, type);
+
 	getToken();
 
+	// Get any subsequent declarations deliminated by commas
 	while(curTok.tok_type == LEX_COMMA)
 	{
 		printf("comma decls\n");
 		getToken();
 
 		parseAssert(LEX_IDENT);
-		hashInsert(curTok.tok_str, TYPE_INT);
+		hashInsert(curTok.tok_str, type);
 		getToken();
 	}
 
 	parseEat(LEX_SEMICOLON);
+}
+
+void parseStruct()
+{
+	char structName[100];
+	parseEat(LEX_STRUCT);
+
+	// Get the struct name from the next token
+	parseAssert(LEX_IDENT);
+	strcpy(curTok.tok_str, structName);
+	getToken();
+	
+	// Parse the struct body
+	parseEat(LEX_LBRACK);
+
+	while( curType == LEX_INT
+		|| curType == LEX_CHARDEC
+		|| curType == LEX_STRDEC )
+	{
+		switch(curType)
+		{
+			
+		}
+	}
+
+	parseEat(LEX_RBRACK);
+	parseEat(LEX_SEMICOLON);
+	
+	
 }
 
 void parseStmts()
@@ -162,11 +228,13 @@ void parseIf()
 
 void parseAssn()
 {
-	if(hashGet(curTok.tok_str) == 0)
+	int type = hashGet(curTok.tok_str);
+	if(type == 0)
 	{
-		printf("Error: varable %s undeclared\n", curTok.tok_str);
+		printf("Error: Variable %s undeclared\n", curTok.tok_str);
 		exit(-1);
 	}
+
 	getToken();
 	switch(curType)
 	{
@@ -179,8 +247,7 @@ void parseAssn()
 			break;
 		default:
 			printf("%s\n", curTok.tok_str);
-			printf("Error: expected assignment statement\n");
-			exit(-1);
+			errMsg("Expected assignment statement");
 	}
 
 	if(curType == LEX_READ)	
@@ -188,9 +255,19 @@ void parseAssn()
 		getToken();
 	}
 
-	else
+	else if(type == TYPE_INT)
 	{
 		parseExpr();
+	}
+	
+	else if(type == TYPE_CHAR)
+	{
+		parseEat(LEX_CHAR);
+	}
+
+	else if(type == TYPE_STR)
+	{
+		parseEat(LEX_STRING);
 	}
 
 	parseEat(LEX_SEMICOLON);
@@ -222,8 +299,7 @@ void parseCall()
 
 			else
 			{
-				printf("Invalid function argument\n");
-				exit(-1);
+				errMsg("Invalid function argument");
 			}
 	
 			if(curType == LEX_COMMA)
@@ -236,8 +312,7 @@ void parseCall()
 
 		if(argC == 0)
 		{
-			printf("Error, print() must have at least one argument\n");
-			exit(-1);
+			errMsg("print() must have at least one argument");
 		}
 
 		parseEat(LEX_RPAREN);

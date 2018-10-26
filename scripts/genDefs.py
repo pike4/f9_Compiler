@@ -30,7 +30,6 @@ def makeDefs(inName, outName):
             break
         line = line[:-1]
         names.append(line)
-        print("curLine: " + line)
         line = inF.readline()
         cnt = cnt + 1
 

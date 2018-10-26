@@ -127,6 +127,10 @@ void makeFSM()
 	states[STATE_INIT]['"'].action = FSM_ACT_SAVE;
 	states[STATE_INIT]['"'].value = LEX_UNUSED;
 
+	states[STATE_INIT]['\''].nextState = STATE_CHAR;
+	states[STATE_INIT]['\''].action = FSM_ACT_SAVE;
+	states[STATE_INIT]['\''].value = LEX_UNUSED;
+
 
 	//STATE_SLASH
 	for( i = 0; i < 256; i++)
@@ -444,6 +448,41 @@ void makeFSM()
 		states[STATE_ESCAPE][i].nextState = STATE_QUOTE;
 		states[STATE_ESCAPE][i].action = FSM_ACT_APPEND;
 		states[STATE_ESCAPE][i].value = LEX_UNUSED;
+	}
+
+
+	//STATE_CHAR
+	for( i = 0; i < 256; i++)
+	{
+		states[STATE_CHAR][i].nextState = STATE_CHAR_END;
+		states[STATE_CHAR][i].action = FSM_ACT_APPEND;
+		states[STATE_CHAR][i].value = LEX_UNUSED;
+	}
+
+	states[STATE_CHAR]['\\'].nextState = STATE_CHAR_ESC;
+	states[STATE_CHAR]['\\'].action = FSM_ACT_APPEND;
+	states[STATE_CHAR]['\\'].value = LEX_UNUSED;
+
+
+	//STATE_CHAR_END
+	for( i = 0; i < 256; i++)
+	{
+		states[STATE_CHAR_END][i].nextState = STATE_INIT;
+		states[STATE_CHAR_END][i].action = FSM_ACT_ERR;
+		states[STATE_CHAR_END][i].value = LEX_UNUSED;
+	}
+
+	states[STATE_CHAR_END]['\''].nextState = STATE_INIT;
+	states[STATE_CHAR_END]['\''].action = FSM_ACT_ARET;
+	states[STATE_CHAR_END]['\''].value = LEX_CHAR;
+
+
+	//STATE_CHAR_ESC
+	for( i = 0; i < 256; i++)
+	{
+		states[STATE_CHAR_ESC][i].nextState = STATE_CHAR_END;
+		states[STATE_CHAR_ESC][i].action = FSM_ACT_APPEND;
+		states[STATE_CHAR_ESC][i].value = LEX_UNUSED;
 	}
 
 }

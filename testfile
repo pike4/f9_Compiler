@@ -6,6 +6,15 @@ program
 {
 	int _test_val, hello, woo;
 	int should_err, probably, i;
+	char aChar;
+	string aString, bString;
+
+	struct myStruct {
+		int a;
+		int b;
+
+		char f;
+	};
 	
 	while(i < 200)
 	{
@@ -15,6 +24,10 @@ program
 	_test_val = 100;
 	i += -1;
 	i -= 0x12A74AD;
+
+	aChar = '\n';
+
+	aString = "hello";
 
 	if ( i < 0)
 	{

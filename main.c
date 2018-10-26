@@ -6,8 +6,6 @@
 #include <time.h>
 #include <assert.h>
 
-#include "hash.h"
-
 extern int col, line;
 extern char nextChar;
 

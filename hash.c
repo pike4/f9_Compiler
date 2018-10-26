@@ -1,4 +1,4 @@
-#include "hash.h"
+#include "compiler.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +8,8 @@ void hashInit()
 {
 	for(int i = 0; i < HASH_MAX; i++)
 	{
-		table[i] = 0;
+		vars[i] = 0;
+		structs[i] = 0;
 	}
 }
 
@@ -25,7 +26,22 @@ int hash(char* key)
 	return abs(ret % 100);
 }
 
-void hashInsert(char* key, int val)
+int getSize(int type)
+{
+	switch(type)
+	{
+		case TYPE_INT:
+			return sizeof(int);
+		case TYPE_CHAR:
+			return sizeof(char);
+		case TYPE_STR:
+			return sizeof(char*);
+		default:
+			return 0;
+	}
+}
+
+void hashInsert(struct listEnt** table, char* key, void* val)
 {
 	int h = hash(key);
 
@@ -67,7 +83,8 @@ void hashInsert(char* key, int val)
 	}
 }
 
-int hashGet(char* key)
+// Get the value of the given key
+void* hashGet(struct listEnt** table, char* key)
 {
 
 	int h = hash(key);
@@ -82,5 +99,35 @@ int hashGet(char* key)
 		else cur = cur->next;
 	}
 
-	return TYPE_UNDEF;
+	return 0;
 }
+/*
+
+void addVar(char* key, int val)
+{
+	struct varDef* newVar = malloc(sizeof(varDef));
+	newVar->type = val;
+	newVar->size = getSize(val);
+
+	hashInsert(vars, key, newVar);
+}
+
+int getVar(char* key)
+{
+	struct varDef* ret = (struct VarDef*) hashGet(vars, key);
+	
+	if(ret != 0)
+		return ret->val;
+	return 0;
+}
+
+void addStruct(char* key, struct structDef* def)
+{
+	hashInsert(structs, key, (void*) def);
+}
+
+struct structDef* getStruct(char* key)
+{
+	return hashGet(structs, key);
+}
+*/

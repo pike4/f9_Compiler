@@ -11,10 +11,9 @@
 #include "parse.h"
 #include "hash.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
 void makeFSM();
+
+extern int col, line;
 
 #endif
