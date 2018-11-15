@@ -27,13 +27,12 @@ program
 	while(i < 200)
 	{
 		print("\"hello\"\n");
+		i += 20;
 		// print("comment\n");
 	}
 	_test_val = 100;
 	i = init1.a + init2.m1.f * 100;
 	i = 100/10;
-	i += -1 * 100 + 2 + 2 +3 *8*8*8+100/20;
-	i -= 0x12A74AD;
 
 	aChar = '\n';
 

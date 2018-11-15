@@ -16,11 +16,9 @@ int main()
 	hashInit();
 	makeFSM();
 	
-	printf("FSM Initialized\n");
 
 	nextChar = getchar();
 
-	printf("parseing\n");
 	parseAll();
 	
 /*	while(1) 
