@@ -1,0 +1,2 @@
+./token < $1 > out.c
+gcc out.c -o out.o

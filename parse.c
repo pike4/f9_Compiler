@@ -127,7 +127,8 @@ void parseDecl()
 
 	parseEat(curType);
 	parseAssert(LEX_IDENT);
-	printf("%s ", curTok.tok_str);
+	printf("%s = 0", curTok.tok_str);
+
 	addVar(curTok.tok_str, type);
 
 	getToken();
@@ -138,7 +139,7 @@ void parseDecl()
 		getToken();
 
 		parseAssert(LEX_IDENT);
-		printf(", %s", curTok.tok_str);
+		printf(", %s = 0 ", curTok.tok_str);
 		addVar(curTok.tok_str, type);
 		getToken();
 	}

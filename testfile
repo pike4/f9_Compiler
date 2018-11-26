@@ -24,9 +24,9 @@ program
 	struct myStruct init1;
 	struct myStruct2 init2;
 	
-	while(i < 200)
+	while(i < 2)
 	{
-		print("\"hello\"\n");
+		print("\"hello\"\n", i);
 		i += 20;
 		// print("comment\n");
 	}
@@ -45,6 +45,6 @@ program
 
 	else
 	{
-		print("all good\n", 1+1, "forU");
+		print("all good\n", 1+1, "forU", init1.a, init2.m1.b);
 	}
 }
