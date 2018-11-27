@@ -13,3 +13,19 @@
 
 10/16/18: Implemented parsing for many parts of f9
 10/17/18: Finished implementing parsing for most terms
+
+10/24/18: Implemented hash table for symbols
+10/25/18: Implemented parsing for structs
+10/25/18: Implemented lookup functions for struct definitions
+
+11/01/18: Started code generation for some types
+
+11/12/18: Finished code generation for most types
+
+11/14/18: Implemented indentation system for code output
+
+11/20/18: Implemented parsing for read()
+11/25/18: Re-implemented parsing for print()
+
+11/25/18: Implemented sample programs for testing
+11/26/18: Change all variable declarations to initialize to 0
