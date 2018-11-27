@@ -280,6 +280,7 @@ void parseStmts()
 			|| curType == LEX_WHILE
 			|| curType == LEX_IDENT 
 			|| curType == LEX_PRINT
+			|| curType == LEX_READ
 			|| curType == LEX_EXIT)
 	{
 		parseStmt();
@@ -304,7 +305,8 @@ void parseStmt()
 	}
 
 	else if(curType == LEX_PRINT
-		|| curType == LEX_EXIT)
+		|| curType == LEX_EXIT
+		|| curType == LEX_READ)
 	{
 		parseCall();
 	}
@@ -430,62 +432,158 @@ void parseCall()
 {
 	if(curType == LEX_PRINT)
 	{
-		getToken();
-		parseEat(LEX_LPAREN);
-		
-		int argC = 0;
-		while(1)
-		{
-			indent();
-			printf("printf(");
-			argC++;
-			if(curType == LEX_STRING)
-			{
-				printf("%s);\n ", curTok.tok_str);
-				getToken();
-			}
-
-			else if(curType == LEX_IDENT
-				|| curType == LEX_NUM
-				|| curType == LEX_LPAREN)
-			{
-				printf("\"%%d\", ");
-				parseExpr();
-				printf(");\n");
-			}
-
-			else
-			{
-				errMsg("Invalid function argument");
-			}
-	
-			if(curType == LEX_COMMA)
-			{
-				getToken();
-			}
-
-			else break;
-		}
-
-		if(argC == 0)
-		{
-			errMsg("print() must have at least one argument");
-		}
-
-		parseEat(LEX_RPAREN);
+		parsePrint();
 	}
 
 	else if(curType == LEX_EXIT)
 	{
-		getToken();
-		parseEat(LEX_LPAREN);
-		indent();
-		printf("exit(");
-		parseExpr();
-		parseEat(LEX_RPAREN);
-		printf(");\n");
+		parseExit();
 	}
-	parseEat(LEX_SEMICOLON);
+
+	else if(curType == LEX_READ)
+	{
+		parseRead();
+	}
+
+}
+
+void parsePrint()
+{
+	getToken();
+	parseEat(LEX_LPAREN);
+	
+	int argC = 0;
+	while(1)
+	{
+		indent();
+		printf("printf(");
+		argC++;
+		if(curType == LEX_STRING)
+		{
+			printf("%s);\n ", curTok.tok_str);
+			getToken();
+		}
+
+		else if(curType == LEX_IDENT
+			|| curType == LEX_NUM
+			|| curType == LEX_LPAREN)
+		{
+			printf("\"%%d\", ");
+			parseExpr();
+			printf(");\n");
+		}
+
+		else
+		{
+			errMsg("Invalid function argument");
+		}
+
+		if(curType == LEX_COMMA)
+		{
+			getToken();
+		}
+
+		else break;
+	}
+
+	if(argC == 0)
+	{
+		errMsg("print() must have at least one argument");
+	}
+
+	parseEat(LEX_RPAREN);
+}
+
+void parseRead()
+{
+	getToken();
+	parseEat(LEX_LPAREN);
+	indent();
+	
+	// Check that read() has at least one argument
+	if(curTok.tok_type == LEX_RPAREN)
+	{
+		printf("read() must be called with at least one argument\n");
+		exit(-1);
+	}
+
+	int moreVars = 1;
+	int argCount = 0;
+	char* argList[MAX_ARGS];
+
+	while(moreVars > 0)
+	{
+		parseAssert(LEX_IDENT);
+	
+		// Check upper bound on input args
+		if(argCount > MAX_ARGS)
+		{
+			printf("Too many arguments to read()\n");
+			exit(-1);
+		}
+
+		// Check that the current variable exists
+		if(getVar(curTok.tok_str) == 0)
+		{
+			printf("variable %s undeclared\n", curTok.tok_str);
+			exit(-1);
+		}
+
+		// Add current var to the list of variables
+		argList[argCount++] = strdup(curTok.tok_str);
+		getToken();
+
+		if(curTok.tok_type == LEX_COMMA) {
+			getToken();
+		}
+
+		else {
+			moreVars = 0;
+		}	
+	}
+
+	parseEat(LEX_RPAREN);
+	
+	printf("scanf(\"");
+	for(int i = 0; i < argCount; i++) {
+		printFormatToken(getVar(argList[i]));
+	}
+	printf("\"");
+	for(int i = 0; i < argCount; i++) {
+		printf(",&%s", argList[i]);
+	}
+
+	printf(");");
+}
+
+void printFormatToken(int type)
+{
+	switch(type)
+	{
+		case TYPE_INT:
+			printf("%%d");
+			break;
+		case TYPE_CHAR:
+			printf("%%c");
+			break;
+		case TYPE_STR:
+			printf("%%s");
+			break;
+		default:
+			printf("Type cannot be printed\n");
+			exit(-1);
+	}
+}
+
+void parseExit()
+{
+	getToken();
+	parseEat(LEX_LPAREN);
+	indent();
+	printf("exit(");
+	parseExpr();
+	parseEat(LEX_RPAREN);
+	printf(");\n");
 }
 
 void parseExpr()

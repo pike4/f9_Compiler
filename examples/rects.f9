@@ -1,0 +1,21 @@
+program
+{
+	int w, h, x, y;
+
+	print("Enter an integer for the width and the height\n")
+	read(w, h)
+	
+	while(x < h)
+	{
+		y = 0;
+		while(y < w)
+		{
+			print("*")
+			y = y + 1;
+		}
+		print("\n")
+		x = x + 1;
+	}
+
+	print(w, h)
+}
