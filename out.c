@@ -4,19 +4,23 @@
 int main() {
 
 	int w = 0, h = 0 , x = 0 , y = 0 ;
-	printf("Enter an integer for the width and the height\n");
- 	scanf("%d%d",&w,&h);	while( x  <  h ) {
+	char* temp0 = "Enter an integer for the width and the height\n";
+	printf("%s",temp0);
+	scanf("%d%d",&w,&h);	while( x  <  h ) {
 		y  = 0;
 		while( y  <  w ) {
-			printf("*");
- 			y  =  y  + 1;
+			char* temp1 = "*";
+			printf("%s",temp1);
+			y  =  y  + 1;
 
 		}
-		printf("\n");
- 		x  =  x  + 1;
+		char* temp2 = "\n";
+		printf("%s",temp2);
+		x  =  x  + 1;
 
 	}
-	printf("%d",  w );
-	printf("%d",  h );
+	int temp3 =  w ;
+	int temp4 =  h ;
+	printf("%d%d",temp3, temp4);
 	return 0;
 }

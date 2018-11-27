@@ -1,5 +1,5 @@
 #include "compiler.h"
-
+int tmpArgs = 0;
 int indentation;
 
 void indent()
@@ -451,45 +451,79 @@ void parsePrint()
 {
 	getToken();
 	parseEat(LEX_LPAREN);
+
+	char tmpName[200];
 	
 	int argC = 0;
-	while(1)
-	{
-		indent();
-		printf("printf(");
-		argC++;
-		if(curType == LEX_STRING)
-		{
-			printf("%s);\n ", curTok.tok_str);
-			getToken();
-		}
+	int moreArgs = 1;
+	int argStart = tmpArgs;
 
-		else if(curType == LEX_IDENT
+	if(curTok.tok_type == LEX_RPAREN)
+	{
+		printf("print() must be called with at least one argument\n");
+		exit(-1);
+	}
+
+	while(moreArgs == 1)
+	{
+		argC++;
+		if(argC > MAX_ARGS)
+		{
+			printf("Too many arguments to print()\n");
+			exit(-1);
+		}
+		
+		sprintf(tmpName, "temp%d", tmpArgs++);
+
+		if(curType == LEX_IDENT
 			|| curType == LEX_NUM
 			|| curType == LEX_LPAREN)
 		{
-			printf("\"%%d\", ");
+			addVar(tmpName, TYPE_INT);
+			indent();
+			printf("int %s = ", tmpName);
 			parseExpr();
-			printf(");\n");
+			printf(";\n");
 		}
-
-		else
+		else if(curType == LEX_STRING)
 		{
-			errMsg("Invalid function argument");
-		}
-
-		if(curType == LEX_COMMA)
-		{
+			addVar(tmpName, TYPE_STR);
+			indent();
+			printf("char* %s = ", tmpName);
+			printf("%s;\n", curTok.tok_str);
 			getToken();
 		}
 
-		else break;
+		else {
+			printf("invalid parameter type\n");
+			exit(-1);
+		}
+	
+		if(curType == LEX_COMMA) {
+			parseEat(LEX_COMMA);
+		} else {
+			moreArgs = 0;
+		}
 	}
-
-	if(argC == 0)
+	indent();
+	printf("printf(\"");
+	for( int i = argStart; i < tmpArgs; i++)
 	{
-		errMsg("print() must have at least one argument");
+		sprintf(tmpName, "temp%d", i);
+		printFormatToken(getVar(tmpName));
 	}
+	printf("\",");
+
+	for(int i = argStart; i < tmpArgs; i++)
+	{
+		sprintf(tmpName, "temp%d", i);
+		printf("%s", tmpName);
+		if(i < tmpArgs - 1)
+		{
+			printf(", ");
+		}
+	}
+	printf(");\n");
 
 	parseEat(LEX_RPAREN);
 }

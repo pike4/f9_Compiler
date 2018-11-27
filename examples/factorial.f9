@@ -1,0 +1,19 @@
+program
+{
+	int in, tmp, out;
+
+	print("Enter a number to compute its factorial")
+
+	read(in)
+
+	out = 1;
+	tmp = in;
+
+	while(in > 1)
+	{
+		out = out * in;
+		in = in - 1;
+	}
+
+	print("Factorial of ", tmp, " is ", out, "\n")
+}
