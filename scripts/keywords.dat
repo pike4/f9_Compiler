@@ -10,3 +10,6 @@ read LEX_READ
 char LEX_CHARDEC
 string LEX_STRDEC
 struct LEX_STRUCT
+function LEX_FUNC
+call LEX_CALL
+return LEX_RETURN

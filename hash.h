@@ -8,10 +8,19 @@
 
 #define HASH_MAX 100
 
+extern int scopeCount;
+extern int curScope;
+
 struct varDef
 {
 	int type;
 	int size;
+};
+
+struct funcDef
+{
+	int* argTypes;
+	int argC;
 };
 
 struct listEnt
@@ -37,6 +46,7 @@ struct structDef
 
 extern struct listEnt* vars[HASH_MAX];
 extern struct listEnt* structs[HASH_MAX];
+extern struct listEnt* funcs[HASH_MAX];
 extern struct structDef* structsByType[HASH_MAX];
 
 extern int globalType;
@@ -50,6 +60,9 @@ int getVar(char* key);
 void addStruct(char* key, struct structDef* def);
 struct structDef* getStruct(char* key); 
 
+void addFunc(char* key, struct funcDef* def);
+struct funcDef* getFunc(char* key);
+
 int getStructMember(int structType, char* name);
 
 void addMember(struct structDef* s, char* name, int type);
@@ -60,4 +73,5 @@ void hashInit();
 
 void printTypeByID(int type);
 
+int tokToType(int tok);
 #endif

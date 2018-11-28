@@ -18,11 +18,13 @@ void parseTerm();
 void parseIf();
 void parseWhile();
 void parseCall();
+void parseReturn();
 void parseRead();
 void parsePrint();
 void parseExit();
 void parseAssn();
 void parseStruct();
+void parseFuncDecl();
 void parsePreDecls();
 void parseStructInit();
 

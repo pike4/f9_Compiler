@@ -1,5 +1,7 @@
 #include "compiler.h"
 int tmpArgs = 0;
+int scopeCount = 0;
+int curScope = 0;
 int indentation;
 
 void indent()
@@ -21,6 +23,12 @@ void parseErr(int tokType)
 void errMsg(char* msg)
 {
 	printf("Error at line %d, col %d: %s\n", line, col, msg);
+	exit(-1);
+}
+
+void parseFail(const char* errMsg)
+{
+	printf("Error: %s\n", errMsg);
 	exit(-1);
 }
 
@@ -57,10 +65,89 @@ void parseAll()
 
 void parsePreDecls()
 {
-	while(curType == LEX_STRUCT)
+	while(curType == LEX_STRUCT || curType == LEX_FUNC)
 	{
-		parseStruct();
+		if(curType == LEX_STRUCT)
+			parseStruct();
+		else parseFuncDecl();
 	}
+}
+
+void parseFuncDecl()
+{
+	parseEat(LEX_FUNC);
+	
+	// Set up a new function declaration to be stored later
+	struct funcDef* newFunc = malloc(sizeof(struct funcDef));
+	int tempArgs[MAX_ARGS];
+	int argC = 0;
+	char tempName[200];
+
+	strcpy(tempName, curTok.tok_str);
+	
+	parseAssert(LEX_IDENT);
+	printf("int %s (", curTok.tok_str);
+	getToken();
+	parseEat(LEX_LPAREN);
+	
+	curScope = ++scopeCount;
+	while(curType != LEX_RPAREN)
+	{
+		int type;
+		if(curType == LEX_INT
+			|| curType == LEX_CHARDEC
+			|| curType == LEX_STRDEC)
+		{
+			type = tokToType(curType);
+			printTypeByID(type);
+			getToken();
+			tempArgs[argC++] = type;
+		}
+
+		else
+		{
+			printf("Expected a type specifier\t %s\n", curTok.tok_str);
+			exit(-1);
+		}
+
+		parseAssert(LEX_IDENT);
+		addVar(curTok.tok_str, type);
+		printf(" %s", curTok.tok_str);
+		getToken();
+		
+		if(curType == LEX_COMMA)
+		{ 
+			printf(", ");
+			getToken();
+		}
+		else if(curType != LEX_RPAREN) 
+		{
+			printf("Expected a comma\t %s\n", curTok.tok_str);
+			exit(-1);
+		}
+	}
+	getToken();
+	
+	// Build and store the new function declaration in the symbol table
+	newFunc->argTypes = malloc(sizeof(int) * argC);
+	newFunc->argC = argC;
+
+	for(int i = 0; i < argC; i++)
+	{
+		newFunc->argTypes[i] = tempArgs[i];
+	}
+
+	// Parse the function body
+	addFunc(tempName, newFunc);
+	parseEat(LEX_LBRACK);
+	printf(")\n{\n");
+	indentation++;
+	parseDecls();
+	parseStmts();
+	parseEat(LEX_RBRACK);
+	indentation--;
+	printf("\n}\n\n");
+
 }
 
 void parsePgm()
@@ -68,6 +155,7 @@ void parsePgm()
 	parseEat(LEX_PROGRAM);
 
 	parseEat(LEX_LBRACK);
+	curScope = 0;
 	printf("int main() {\n\n");
 	indentation = 1;
 	parseDecls();
@@ -281,7 +369,8 @@ void parseStmts()
 			|| curType == LEX_IDENT 
 			|| curType == LEX_PRINT
 			|| curType == LEX_READ
-			|| curType == LEX_EXIT)
+			|| curType == LEX_EXIT
+			|| curType == LEX_RETURN)
 	{
 		parseStmt();
 	}
@@ -304,11 +393,28 @@ void parseStmt()
 		parseAssn();
 	}
 
-	else if(curType == LEX_PRINT
-		|| curType == LEX_EXIT
-		|| curType == LEX_READ)
+	else if(curType == LEX_PRINT)
 	{
-		parseCall();
+		parsePrint();
+	}
+
+	else if(curType == LEX_EXIT)
+	{
+		parseExit();
+	}
+	
+	else if(curType == LEX_READ)
+	{
+		parseRead();
+	}
+	
+	else if(curType == LEX_RETURN)
+	{
+		if(curScope == 0)
+		{
+			parseFail("Unexpected return statement in main function");
+		}
+		parseReturn();
 	}
 }
 
@@ -402,12 +508,7 @@ void parseAssn()
 	}
 
 
-	if(curType == LEX_READ)	
-	{
-		getToken();
-	}
-
-	else if(type == TYPE_INT)
+	if(type == TYPE_INT)
 	{
 		parseExpr();
 	}
@@ -430,21 +531,81 @@ void parseAssn()
 
 void parseCall()
 {
-	if(curType == LEX_PRINT)
+	parseEat(LEX_CALL);
+	parseEat(LEX_COLON);
+	parseEat(LEX_COLON);
+
+	parseAssert(LEX_IDENT);
+
+	struct funcDef* curFunc = getFunc(curTok.tok_str);
+
+	if(curFunc == 0)
 	{
-		parsePrint();
+		printf("Undefined function\n");
+		exit(-1);
+	}
+	
+	printf("%s(", curTok.tok_str);
+	getToken();
+	parseEat(LEX_LPAREN);
+	int index = 0;
+	
+	while(curType != LEX_RPAREN)
+	{
+		int curVarType = getVar(curTok.tok_str);
+
+		if(curType == LEX_STRING || 
+			(curType == LEX_IDENT && curVarType == TYPE_STR))
+		{
+			//do type check
+			if(curFunc->argTypes[index] != TYPE_STR) 
+				parseFail("unexpected string in function call");
+			printf("%s", curTok.tok_str);
+			getToken();
+		}
+		else if(curType == LEX_CHAR ||
+			(curType == LEX_IDENT &&  curVarType == TYPE_CHAR))
+		{
+			if(curFunc->argTypes[index] != TYPE_CHAR)
+			{
+				parseFail(" unexpected char in function call");
+			}
+
+			printf("%s", curTok.tok_str);
+			getToken();
+		}
+		else
+		{
+			if(curFunc->argTypes[index] != TYPE_INT)
+				parseFail("unexpected int in fuction call");
+			parseExpr();
+		}
+
+		if(curType == LEX_COMMA)
+		{
+			printf(", ");
+			getToken();
+		}
+		else if(curType != LEX_RPAREN)
+		{
+			printf("expectd a comma\n");
+			exit(-1);
+		}
+		index++;
 	}
 
-	else if(curType == LEX_EXIT)
-	{
-		parseExit();
-	}
+	parseEat(LEX_RPAREN);
+	printf(")");
+}
 
-	else if(curType == LEX_READ)
-	{
-		parseRead();
-	}
-
+void parseReturn()
+{
+	parseEat(LEX_RETURN);
+	indent();
+	printf("return ");
+	parseExpr();
+	parseEat(LEX_SEMICOLON);
+	printf(";\n");
 }
 
 void parsePrint()
@@ -587,7 +748,7 @@ void parseRead()
 		printf(",&%s", argList[i]);
 	}
 
-	printf(");");
+	printf(");\n");
 }
 
 void printFormatToken(int type)
@@ -709,6 +870,11 @@ void parseTerm()
 		printf("%s", curTok.tok_str);
 		getToken();
 		return;
+	}
+
+	else if(curType == LEX_CALL)
+	{
+		parseCall();
 	}
 
 	else

@@ -1,0 +1,30 @@
+function foo(int a, char b, string c)
+{
+	int y;
+	int u;
+	u = y;
+}
+
+function bar(int a, char b, int c)
+{
+	string h;
+	if(a < b)
+	{
+		c = 3;
+		return c;
+	}
+	else
+	{
+		c = call::foo(1+2, '1', "1+2");
+		c = call::foo(a, b, h);
+		c = call::foo(call::foo(1, 'a', "a"), 'a', "a");
+		return c + 1;
+	}
+}
+
+program
+{
+	int q;
+	q = 0;
+	exit(1)
+}

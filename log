@@ -20,12 +20,11 @@
 
 11/01/18: Started code generation for some types
 
-11/12/18: Finished code generation for most types
+11/08/18: Finished code generation for most types
+11/11/18: Implemented indentation system for code output
 
-11/14/18: Implemented indentation system for code output
-
-11/20/18: Implemented parsing for read()
-11/25/18: Re-implemented parsing for print()
+11/14/18: Implemented parsing for read()
+11/18/18: Re-implemented parsing for print()
 
 11/25/18: Implemented sample programs for testing
 11/26/18: Change all variable declarations to initialize to 0

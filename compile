@@ -1,2 +1,5 @@
-./token < $1 > out.c
-gcc out.c -o out.o
+outputC="$1.c"
+outputO="$1.o"
+
+./token < $1 > $outputC
+gcc $outputC -o $outputO

@@ -44,6 +44,10 @@
 #define LEX_CHARDEC 43
 #define LEX_STRDEC 44
 #define LEX_STRUCT 45
-#define NUM_TOKENS 46
+#define LEX_FUNC 46
+#define LEX_CALL 47
+#define LEX_COLON 48
+#define LEX_RETURN 49
+#define NUM_TOKENS 50
 
-char* tokens_names[47];
+char* tokens_names[51];

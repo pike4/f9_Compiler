@@ -1,8 +1,13 @@
 #include "hash.h"
+#include "tokens.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#define MAX_SYMBOL 1000
+
+char nameBuff[MAX_SYMBOL];
 
 void hashInit()
 {
@@ -24,6 +29,17 @@ int hash(char* key)
 	}
 
 	return abs(ret % 100);
+}
+
+int tokToType(int tok)
+{
+	switch(tok)
+	{
+		case LEX_INT: return TYPE_INT;
+		case LEX_CHARDEC: return TYPE_CHAR;
+		case LEX_STRDEC: return TYPE_STR;
+		default: return TYPE_UNDEF;
+	}
 }
 
 int getSize(int type)
@@ -111,16 +127,29 @@ void addVar(char* key, int val)
 	newVar->type = val;
 	newVar->size = getSize(val);
 
-	hashInsert(vars, key, newVar);
+	sprintf(nameBuff, "%s:%d", key, curScope);
+
+	hashInsert(vars, nameBuff, newVar);
 }
 
 int getVar(char* key)
 {
-	struct varDef* ret = ((struct VarDef*) hashGet(vars, key));
+	sprintf(nameBuff, "%s:%d", key, curScope);
+	struct varDef* ret = ((struct VarDef*) hashGet(vars, nameBuff));
 	
 	if(ret != 0)
 		return ret->type;
 	return 0;
+}
+
+void addFunc(char* key, struct funcDef* def)
+{
+	hashInsert(&funcs[0], key, (void*) def);
+}
+
+struct funcDef* getFunc(char* key)
+{
+	return hashGet(funcs, key);
 }
 
 void addStruct(char* key, struct structDef* def)
@@ -191,7 +220,7 @@ void printTypeByID(int type)
 			printf("int");
 			break;
 		case TYPE_STR:
-			printf("string");
+			printf("char*");
 			break;
 		case TYPE_CHAR:
 			printf("char");
@@ -203,6 +232,7 @@ void printTypeByID(int type)
 
 struct listEnt* vars[HASH_MAX];
 struct listEnt* structs[HASH_MAX];
+struct listEnt* funcs[HASH_MAX];
 
 struct structDef* structsByType[HASH_MAX];
 int globalType = TYPE_CHAR + 1;

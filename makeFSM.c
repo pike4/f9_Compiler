@@ -58,6 +58,10 @@ void makeFSM()
 	states[STATE_INIT]['.'].action = FSM_ACT_SRET;
 	states[STATE_INIT]['.'].value = LEX_DOT;
 
+	states[STATE_INIT][':'].nextState = STATE_INIT;
+	states[STATE_INIT][':'].action = FSM_ACT_SRET;
+	states[STATE_INIT][':'].value = LEX_COLON;
+
 	states[STATE_INIT]['>'].nextState = STATE_GT;
 	states[STATE_INIT]['>'].action = FSM_ACT_SAVE;
 	states[STATE_INIT]['>'].value = LEX_UNUSED;

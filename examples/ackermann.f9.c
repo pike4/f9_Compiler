@@ -27,13 +27,15 @@ int main() {
 	char* temp0 = "Enter 2 numbers to compute";
 	char* temp1 = " the ackermann function for them";
 	printf("%s%s",temp0, temp1);
-	scanf("%d%d",&b,&c);	a  = ackermann( b ,  c );
+	scanf("%d%d",&b,&c);
+	a  = ackermann( b ,  c );
 	char* temp2 = "Ackermann(";
 	int temp3 =  b ;
 	char* temp4 = ", ";
 	int temp5 =  c ;
 	char* temp6 = ") = ";
 	int temp7 =  a ;
-	printf("%s%d%s%d%s%d",temp2, temp3, temp4, temp5, temp6, temp7);
+	char* temp8 = "\n";
+	printf("%s%d%s%d%s%d%s",temp2, temp3, temp4, temp5, temp6, temp7, temp8);
 	return 0;
 }
