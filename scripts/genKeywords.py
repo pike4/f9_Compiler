@@ -3,8 +3,8 @@ def makeKeywords():
 
 
     inF = open("keywords.dat", "r")
-    outF = open("../keywords.h", "w")
-    outF2 = open("../keywords.c", "w")
+    outF = open("../src/keywords.h", "w")
+    outF2 = open("../src/keywords.c", "w")
 
     outF.write("#include \"tokens.h\"\n")
 

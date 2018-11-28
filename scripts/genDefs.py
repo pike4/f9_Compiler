@@ -8,6 +8,7 @@ def makeDefs(inName, outName):
     inF = open(inName, 'r')
     outF = open(outName, 'w')
 
+
 	#Open a second file as a c file of the same base name
     outName2 = outName[:-1] + "c"
     outF2 = open(outName2, 'w')
@@ -18,7 +19,7 @@ def makeDefs(inName, outName):
 
  
 	#Remove leading directory from output file name
-    while(outName[0] == '.' or outName[0] == '/'):
+    while(outName.find('/') != -1):
         outName = outName[1:]
     
     mainName = str.split(inName, '.')[0]

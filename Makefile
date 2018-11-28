@@ -1,2 +1,2 @@
 all:
-	gcc -g -o token states.c tokens.c keywords.c actions.c makeFSM.c tok.c hash.c parse.c main.c
+	gcc -g -o token src/states.c src/tokens.c src/keywords.c src/actions.c src/makeFSM.c src/tok.c src/hash.c src/parse.c src/main.c
