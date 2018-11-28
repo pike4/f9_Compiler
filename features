@@ -1,0 +1,1 @@
+This compiler implements all features specified in f9.txt. Additionally, it includes supports for user-defined structs, char and string variables, and user-defined functions.

@@ -1,0 +1,25 @@
+struct test
+{
+	int a;
+	int b;
+};
+
+struct badType
+{
+	char f;
+};
+
+function fun(struct test a)
+{
+	print(a.a)
+}
+
+program
+{
+	struct test g;
+	struct badType h;
+	g.a = 5;
+	call::fun(g);
+	//call::fun(h);
+	print("\n")
+}

@@ -108,6 +108,17 @@ void parseFuncDecl()
 			tempArgs[argC++] = type;
 		}
 
+		else if(curType == LEX_STRUCT)
+		{
+			getToken();
+			printf("struct ");
+			parseAssert(LEX_IDENT);
+			printf("%s ", curTok.tok_str);
+			type = getStruct(curTok.tok_str)->type;
+			getToken();
+			tempArgs[argC++] = type;
+		}
+
 		else
 		{
 			printf("Expected a type specifier\t %s\n", curTok.tok_str);
@@ -374,6 +385,7 @@ void parseStmts()
 			|| curType == LEX_PRINT
 			|| curType == LEX_READ
 			|| curType == LEX_EXIT
+			|| curType == LEX_CALL
 			|| curType == LEX_RETURN)
 	{
 		parseStmt();
@@ -410,6 +422,14 @@ void parseStmt()
 	else if(curType == LEX_READ)
 	{
 		parseRead();
+	}
+
+	else if(curType == LEX_CALL)
+	{
+		indent();
+		parseCall();
+		parseEat(LEX_SEMICOLON);
+		printf(";\n");
 	}
 	
 	else if(curType == LEX_RETURN)
@@ -494,8 +514,22 @@ void parseAssn()
 
 	indent();
 	printf("%s ", curTok.tok_str);
-
 	getToken();
+
+	while(curType == LEX_DOT)
+	{
+		printf(".");
+		if(type == 0) {
+			parseFail("Struct has no such member\n");
+		}
+		
+		getToken();
+		parseAssert(LEX_IDENT);
+		printf("%s", curTok.tok_str);
+		type = getStructMember(type , curTok.tok_str);
+		getToken();
+	}	
+
 	switch(curType)
 	{
 		case LEX_ASSIGN:
@@ -578,6 +612,18 @@ void parseCall()
 			printf("%s", curTok.tok_str);
 			getToken();
 		}
+
+		else if(curType == LEX_IDENT && curVarType != TYPE_INT)
+		{
+			if(curVarType != curFunc->argTypes[index])
+			{
+				printf("Current function does not call for struct of type %s\n", curTok.tok_str);
+				exit(-1);
+			}
+			printf("%s", curTok.tok_str);
+			getToken();
+		}
+
 		else
 		{
 			if(curFunc->argTypes[index] != TYPE_INT)
@@ -691,6 +737,9 @@ void parsePrint()
 	printf(");\n");
 
 	parseEat(LEX_RPAREN);
+	if(curTok.tok_type == LEX_SEMICOLON) {
+		parseFail("print statements do not end with a semicolon!\n");
+	}
 }
 
 void parseRead()
@@ -753,6 +802,10 @@ void parseRead()
 	}
 
 	printf(");\n");
+
+	if(curTok.tok_type == LEX_SEMICOLON) {
+		parseFail("read statements do not end with a semicolon!\n");
+	}
 }
 
 void printFormatToken(int type)

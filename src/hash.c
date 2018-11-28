@@ -1,9 +1,15 @@
+/*************************
+*********hash.c***********
+*************************/
+
+
 #include "hash.h"
 #include "tokens.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
 
 #define MAX_SYMBOL 1000
 

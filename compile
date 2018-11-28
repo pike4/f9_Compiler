@@ -1,5 +1,5 @@
 outputC="$1.c"
 outputO="$1.o"
 
-./token < $1 > $outputC
+./f9 < $1 > $outputC
 gcc $outputC -o $outputO
