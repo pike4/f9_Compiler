@@ -30,3 +30,4 @@
 11/26/18: Change all variable declarations to initialize to 0
 11/27/18: Added support for user-defined functions
 11/28/18: Fixed some bugs related to struct member references and function calls with structs as members
+11/28/18: Added compatibility for other data types to read() function

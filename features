@@ -1,1 +1,36 @@
-This compiler implements all features specified in f9.txt. Additionally, it includes supports for user-defined structs, char and string variables, and user-defined functions.
+This compiler implements all features specified in f9.txt. Additionally, it includes the following features:
+
+char and string datatypes:
+	char variables are declared using the 'char' keyword. Characters can be assigned using char literals in single quotes or other char variables
+	string variables are declared using the 'string keyword. Strings are assigned using string variables in double quotes or other string variables
+
+Structs:
+	Structs are declared before the main function using the "struct" keyword. They can contain int, char, string, or previously defined structs as member variables.
+	Structs are declared as follows:
+
+	struct structName {
+		//Members
+	};
+
+Functions:
+
+	Functions are declared before the main function using the "function" keyword. They can only return int. They can contain void, int, char, string, or previously defined structs as parameters.
+	Recursion is allowed.
+	Function invocations are made using the "call" keyword. Usage us as follows:
+
+	function fun(int a) {
+		//statements
+	}
+
+	program {
+		call::fun(1);
+	}
+
+Return:
+	Functions can be terminated using the "return" keyword. Return can only be used within a function. Any invocation of return in the main method will result in a compile-time error
+
+Print:
+	parsePrint() has been altered to accept arguments of type char, string, and struct, as well as string and character literals
+
+Read:
+	parseRead() does not yet allow arguments of a type other than int
