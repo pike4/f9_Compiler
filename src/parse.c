@@ -242,7 +242,10 @@ void parseDecl()
 		getToken();
 
 		parseAssert(LEX_IDENT);
-		printf(", %s = 0 ", curTok.tok_str);
+		if(type != TYPE_STR)
+			printf(", %s = 0 ", curTok.tok_str);
+		else
+			printf(", *%s = 0 ", curTok.tok_str);
 		addVar(curTok.tok_str, type);
 		getToken();
 	}
@@ -553,14 +556,35 @@ void parseAssn()
 	
 	else if(type == TYPE_CHAR)
 	{
+		if(curType == LEX_IDENT)
+		{
+			if(getVar(curTok.tok_str) != TYPE_CHAR)
+			{
+				parseFail("Assignment to char from incompatible type");
+			}
+		}
+		else {
+			parseAssert(LEX_CHAR);
+		}
+	
 		printf(" %s ", curTok.tok_str);
-		parseEat(LEX_CHAR);
+		getToken();
 	}
 
 	else if(type == TYPE_STR)
 	{
+		if(curType == LEX_IDENT)
+		{
+			if(getVar(curTok.tok_str) != TYPE_STR)
+			{
+				parseFail("Assignment to string from incompatible type");
+			}
+		}
+		else {
+			parseAssert(LEX_STRING);
+		}
 		printf(" %s ", curTok.tok_str);
-		parseEat(LEX_STRING);
+		getToken();
 	}
 
 	printf(";\n");
@@ -664,6 +688,8 @@ void parsePrint()
 	parseEat(LEX_LPAREN);
 
 	char tmpName[200];
+	char tmpBuff[1000];
+	int buffIndex = 0;
 	
 	int argC = 0;
 	int moreArgs = 1;
@@ -677,6 +703,7 @@ void parsePrint()
 
 	while(moreArgs == 1)
 	{
+		buffIndex = 0;
 		argC++;
 		if(argC > MAX_ARGS)
 		{
@@ -686,14 +713,77 @@ void parsePrint()
 		
 		sprintf(tmpName, "temp%d", tmpArgs++);
 
-		if(curType == LEX_IDENT
+		int tempType = getVar(curTok.tok_str);
+		if(curType == LEX_IDENT && getVar(curTok.tok_str) > TYPE_CHAR)
+		{
+			strcpy(&tmpBuff[0], curTok.tok_str);
+			buffIndex += strlen(curTok.tok_str);
+			
+			getToken();
+			while(curType == LEX_DOT)
+			{
+				if(tempType == 0)
+					parseFail("No such member\n");
+				getToken();
+				tmpBuff[buffIndex++] = '.';
+				tempType = getStructMember(tempType, curTok.tok_str);
+				strcpy(&tmpBuff[buffIndex], curTok.tok_str);
+				buffIndex += strlen(curTok.tok_str);
+				getToken();
+			}
+			tmpBuff[buffIndex + 1] = 0;
+			indent();
+			if(tempType == TYPE_INT)
+			{
+				printf("int %s = %s;\n", tmpName, tmpBuff);
+				addVar(tmpName, TYPE_INT);
+			}
+			else if(tempType == TYPE_CHAR)
+			{
+				printf("char %s = %s;\n", tmpName, tmpBuff);
+				addVar(tmpName, TYPE_CHAR);
+			}
+			else if(tempType == TYPE_STR)
+			{
+				printf("char* %s = %s;\n", tmpName, tmpBuff);
+				addVar(tmpName, TYPE_STR);
+			}
+		}
+
+		else if(curType == LEX_IDENT
 			|| curType == LEX_NUM
 			|| curType == LEX_LPAREN)
 		{
-			addVar(tmpName, TYPE_INT);
 			indent();
-			printf("int %s = ", tmpName);
-			parseExpr();
+		
+
+			if(curType == LEX_IDENT)
+			{
+				if(tempType == TYPE_INT) {
+					addVar(tmpName, TYPE_INT);
+					printf("int %s = ", tmpName);
+					parseExpr();
+				}
+				else if(tempType == TYPE_STR) {
+					addVar(tmpName, TYPE_STR);
+					printf("char* %s = %s", tmpName, curTok.tok_str);
+					getToken();
+				}
+				else if(tempType == TYPE_CHAR) {
+					addVar(tmpName, TYPE_CHAR);
+					printf("char %s = %s", tmpName, curTok.tok_str);
+					getToken();
+				}
+				else {
+					parseFail("Unprintable type");
+				}
+			}
+			else {
+				printf("int %s = ", tmpName);
+				parseExpr();
+			}
+
+
 			printf(";\n");
 		}
 		else if(curType == LEX_STRING)
@@ -701,6 +791,14 @@ void parsePrint()
 			addVar(tmpName, TYPE_STR);
 			indent();
 			printf("char* %s = ", tmpName);
+			printf("%s;\n", curTok.tok_str);
+			getToken();
+		}
+		else if(curType == LEX_CHAR)
+		{
+			addVar(tmpName, TYPE_CHAR);
+			indent();
+			printf("char %s = ", tmpName);
 			printf("%s;\n", curTok.tok_str);
 			getToken();
 		}

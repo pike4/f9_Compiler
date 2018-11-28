@@ -6,7 +6,9 @@ struct test
 
 struct badType
 {
-	char f;
+	char c;
+	string s;
+	int i;
 };
 
 function fun(struct test a)
@@ -15,11 +17,26 @@ function fun(struct test a)
 }
 
 program
-{
-	struct test g;
-	struct badType h;
-	g.a = 5;
-	call::fun(g);
-	//call::fun(h);
-	print("\n")
+{	
+	char c1, c2;
+	string s1, s2;
+	int i1, i2;
+	struct badType b;
+
+	c1 = 'a';
+	c2 = c1;
+
+	s1 = "a";
+	s2 = s1;
+	
+	i1 = 1+2+1+1;
+	i2 = i1;
+	
+	b.s = "hellot";
+	
+	b.c = 'a';
+
+	b.i = 1+1+1*(12*12);
+
+	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n')
 }
