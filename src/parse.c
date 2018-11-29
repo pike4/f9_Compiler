@@ -227,10 +227,17 @@ void parseDecl()
 			errMsg
 			("missing type specifier - int assumed. Note: f9 does not support default-int\n");
 	}
-
-	parseEat(curType);
-	parseAssert(LEX_IDENT);
-	printf("%s = 0", curTok.tok_str);
+	
+	if(curType == LEX_STRDEC) {
+		getToken();
+		parseAssert(LEX_IDENT);
+		printf("%s = malloc(100)", curTok.tok_str);
+	}
+	else {
+		getToken();
+		parseAssert(LEX_IDENT);
+		printf("%s = 0", curTok.tok_str);
+	}
 
 	addVar(curTok.tok_str, type);
 
@@ -854,6 +861,10 @@ void parseRead()
 	getToken();
 	parseEat(LEX_LPAREN);
 	indent();
+
+	char buff[1000];
+	int buffInd = 0;
+	int curVarType;
 	
 	// Check that read() has at least one argument
 	if(curTok.tok_type == LEX_RPAREN)
@@ -865,10 +876,12 @@ void parseRead()
 	int moreVars = 1;
 	int argCount = 0;
 	char* argList[MAX_ARGS];
+	int argTypes[MAX_ARGS];
 
 	while(moreVars > 0)
 	{
 		parseAssert(LEX_IDENT);
+		buffInd = 0;
 	
 		// Check upper bound on input args
 		if(argCount > MAX_ARGS)
@@ -877,16 +890,37 @@ void parseRead()
 			exit(-1);
 		}
 
+		curVarType = getVar(curTok.tok_str);
+
 		// Check that the current variable exists
-		if(getVar(curTok.tok_str) == 0)
+		if(curVarType == 0)
 		{
 			printf("variable %s undeclared\n", curTok.tok_str);
 			exit(-1);
 		}
 
+		strcpy(buff, curTok.tok_str);
+		buffInd += strlen(curTok.tok_str);
+
 		// Add current var to the list of variables
-		argList[argCount++] = strdup(curTok.tok_str);
 		getToken();
+
+		// Continue parsing the variable if it is the member of a struct
+		while(curTok.tok_type == LEX_DOT)
+		{
+			buff[buffInd++] = '.';
+			getToken();
+			parseAssert(LEX_IDENT);
+			strcpy(&buff[buffInd], curTok.tok_str);
+			buffInd += strlen(curTok.tok_str);
+			buff[buffInd] = 0;
+			curVarType = getStructMember(curVarType, curTok.tok_str);
+			getToken();
+		}
+
+		argTypes[argCount] = curVarType;
+		argList[argCount++] = strdup(buff);
+			
 
 		if(curTok.tok_type == LEX_COMMA) {
 			getToken();
@@ -897,15 +931,20 @@ void parseRead()
 		}	
 	}
 
+
 	parseEat(LEX_RPAREN);
 	
 	printf("scanf(\"");
 	for(int i = 0; i < argCount; i++) {
-		printFormatToken(getVar(argList[i]));
+		printFormatToken(argTypes[i]);
 	}
 	printf("\"");
 	for(int i = 0; i < argCount; i++) {
-		printf(",&%s", argList[i]);
+		if(argTypes[i] == TYPE_STR)
+			parseFail("String variables cannot be read");
+		else
+			printf(",&%s", argList[i]);
+		free(argList[i]);
 	}
 
 	printf(");\n");
@@ -929,7 +968,7 @@ void printFormatToken(int type)
 			printf("%%s");
 			break;
 		default:
-			printf("Type cannot be printed\n");
+			printf("Type %d cannot be printed\n", type);
 			exit(-1);
 	}
 }

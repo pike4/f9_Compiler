@@ -28,7 +28,7 @@ int fun (struct test  a)
 int main() {
 
 	char c1 = 0, c2 = 0 ;
-	char* s1 = 0, *s2 = 0 ;
+	char* s1 = malloc(100), *s2 = 0 ;
 	int i1 = 0, i2 = 0 ;
 	struct badType b;
 	c1  =  'a' ;
@@ -51,5 +51,16 @@ int main() {
 	int temp9 = 1;
 	int temp10 = 1 + 2 + 2 + 2;
 	printf("%s%d%s%c%s%s%c%d%d%d",temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10);
+	scanf("%c%d%d%c",&c1,&i1,&b.i,&b.c);
+	char* temp11 = "c1 ";
+	char temp12 = c1;
+	char* temp13 = "i1 ";
+	int temp14 =  i1 ;
+	char* temp15 = "b.i: ";
+	int temp16 = b.i;
+	char* temp17 = " b.c: ";
+	char temp18 = b.c;
+	char temp19 = '\n';
+	printf("%s%c%s%d%s%d%s%c%c",temp11, temp12, temp13, temp14, temp15, temp16, temp17, temp18, temp19);
 	return 0;
 }

@@ -44,4 +44,6 @@ program
 	b.i = 1+1+1*(12*12);
 
 	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n', call::retZero(), 1, 1+2+2+2)
+	read(c1, i1, b.i, b.c)
+	print("c1 ", c1, "i1 ", i1, "b.i: ", b.i, " b.c: ", b.c, '\n')
 }
