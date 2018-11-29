@@ -11,6 +11,11 @@ struct badType
 	int i;
 };
 
+function retZero()
+{
+	return 0;
+}
+
 function fun(struct test a)
 {
 	print(a.a)
@@ -38,5 +43,5 @@ program
 
 	b.i = 1+1+1*(12*12);
 
-	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n')
+	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n', call::retZero(), 1, 1+2+2+2)
 }

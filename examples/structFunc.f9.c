@@ -12,6 +12,12 @@ struct badType {
 		int i;
 };
 
+int retZero ()
+{
+	return 0;
+
+}
+
 int fun (struct test  a)
 {
 	int temp0 = a.a;
@@ -41,6 +47,9 @@ int main() {
 	char* temp5 = " b.s: ";
 	char* temp6 = b.s;
 	char temp7 = '\n';
-	printf("%s%d%s%c%s%s%c",temp1, temp2, temp3, temp4, temp5, temp6, temp7);
+	int temp8 = retZero();
+	int temp9 = 1;
+	int temp10 = 1 + 2 + 2 + 2;
+	printf("%s%d%s%c%s%s%c%d%d%d",temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10);
 	return 0;
 }

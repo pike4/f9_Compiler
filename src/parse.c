@@ -781,9 +781,18 @@ void parsePrint()
 			else {
 				printf("int %s = ", tmpName);
 				parseExpr();
+				addVar(tmpName, TYPE_INT);
 			}
 
 
+			printf(";\n");
+		}
+		else if(curType == LEX_CALL)
+		{
+			indent();
+			printf("int %s = ", tmpName);
+			addVar(tmpName, TYPE_INT);
+			parseCall();
 			printf(";\n");
 		}
 		else if(curType == LEX_STRING)
