@@ -1,5 +1,0 @@
-outputC="$1.c"
-outputO="$1.o"
-
-./f9 < $1 > $outputC
-gcc $outputC -o $outputO
