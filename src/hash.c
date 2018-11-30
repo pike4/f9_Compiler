@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
+extern FILE* outFile;
 
 #define MAX_SYMBOL 1000
 
@@ -223,16 +223,16 @@ void printTypeByID(int type)
 			printf("undefined");
 			break;
 		case TYPE_INT:
-			printf("int");
+			fprintf(outFile, "int");
 			break;
 		case TYPE_STR:
-			printf("char*");
+			fprintf(outFile, "char*");
 			break;
 		case TYPE_CHAR:
-			printf("char");
+			fprintf(outFile, "char");
 			break;
 		default:
-			printf("struct");
+			fprintf(outFile, "struct");
 	}
 }
 

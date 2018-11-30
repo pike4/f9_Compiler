@@ -23,10 +23,12 @@ void parseRead();
 void parsePrint();
 void parseExit();
 void parseAssn();
+void parseVar(int* type, char* nameBuff);
 void parseStruct();
 void parseFuncDecl();
 void parsePreDecls();
 void parseStructInit();
+void parseCopy();
 
 void printFormatToken(int type);
 #endif

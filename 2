@@ -87,14 +87,17 @@ int main(int argc, char** args)
 		}
 	}
 
+	printf("cFile: %s\n", cFileName);
+	printf("oFile: %s\n", oFileName);
+
 	hashInit();
 	makeFSM();
 	
 	nextChar = fgetc(inFile);
 
 	parseAll();
-	fclose(outFile);
 
+	printf("done?\n");
 	// invoke GCC
 	char* newArgs[5];
 	newArgs[0] = strdup("gcc");
@@ -103,7 +106,13 @@ int main(int argc, char** args)
 	newArgs[3] = strdup(oFileName);
 	newArgs[4] = 0;
 
+	printf("%s\n", newArgs[0]);
+	printf("%s\n", newArgs[1]);
+	printf("%s\n", newArgs[2]);
+	printf("%s\n", newArgs[3]);
+
 	execvp(newArgs[0], &newArgs[0]);
+	printf("Or not\n");
 	printf("%s\n", strerror(errno));
 
 }

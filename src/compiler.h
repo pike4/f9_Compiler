@@ -19,6 +19,8 @@ extern char nextChar;
 extern struct tok curTok;
 extern int line, col;
 
+extern FILE *inFile, *outFile;
+
 void makeFSM();
 
 #endif

@@ -13,3 +13,4 @@ struct LEX_STRUCT
 function LEX_FUNC
 call LEX_CALL
 return LEX_RETURN
+copy LEX_COPY

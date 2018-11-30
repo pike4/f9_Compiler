@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "compiler.h"
 
@@ -16,12 +17,19 @@ int col = 0, line = 0;
 // Get the next character and update the line numbers
 void getch()
 {
-	nextChar = getchar();
+	//printf("read\n");
+	nextChar = fgetc(inFile);
+	//nextChar = getchar();
 	col++;
 	if(nextChar == '\n')
 	{
 		line++;
 		col = 0;
+	}
+
+	if(ferror(inFile))
+	{
+		nextChar = EOF;
 	}
 }
 

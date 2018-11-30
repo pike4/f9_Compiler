@@ -12,8 +12,14 @@ void indent()
 {
 	for( int i = 0; i < indentation; i++)
 	{
-		printf("\t");
+		fprintf(outFile,"\t");
 	}
+}
+
+void errMsg(const char* msg)
+{
+	printf("Error at line %d, col %d: %s\n", line, col, msg);
+	exit(-1);
 }
 
 void parseErr(int tokType)
@@ -21,18 +27,12 @@ void parseErr(int tokType)
 	printf("Error, expected, %s, got %s\n", tokens_names[tokType], tokens_names[curTok.tok_type]);
 	if(curType == LEX_UNUSED)
 		printf("\tstr: %s\n", curTok.tok_str);
-	exit(-1);
+	errMsg("");
 }
 
-void errMsg(char* msg)
+void parseFail(const char* err)
 {
-	printf("Error at line %d, col %d: %s\n", line, col, msg);
-	exit(-1);
-}
-
-void parseFail(const char* errMsg)
-{
-	printf("Error: %s\n", errMsg);
+	errMsg(err);
 	exit(-1);
 }
 
@@ -53,7 +53,7 @@ void parseEat(int tokType)
 void parseAll()
 {
 	indentation = 0;
-	printf("#include <stdio.h>\n#include <stdlib.h>\n\n");
+	fprintf(outFile,"#include <stdio.h>\n#include <stdlib.h>\n#include<string.h>\n\n");
 	getToken();
 
 	parsePreDecls();
@@ -90,7 +90,7 @@ void parseFuncDecl()
 	strcpy(tempName, curTok.tok_str);
 	
 	parseAssert(LEX_IDENT);
-	printf("int %s (", curTok.tok_str);
+	fprintf(outFile,"int %s (", curTok.tok_str);
 	getToken();
 	parseEat(LEX_LPAREN);
 	
@@ -111,9 +111,9 @@ void parseFuncDecl()
 		else if(curType == LEX_STRUCT)
 		{
 			getToken();
-			printf("struct ");
+			fprintf(outFile,"struct ");
 			parseAssert(LEX_IDENT);
-			printf("%s ", curTok.tok_str);
+			fprintf(outFile,"%s ", curTok.tok_str);
 			type = getStruct(curTok.tok_str)->type;
 			getToken();
 			tempArgs[argC++] = type;
@@ -121,24 +121,22 @@ void parseFuncDecl()
 
 		else
 		{
-			printf("Expected a type specifier\t %s\n", curTok.tok_str);
-			exit(-1);
+			parseFail("Expected a type specifier");
 		}
 
 		parseAssert(LEX_IDENT);
 		addVar(curTok.tok_str, type);
-		printf(" %s", curTok.tok_str);
+		fprintf(outFile," %s", curTok.tok_str);
 		getToken();
 		
 		if(curType == LEX_COMMA)
 		{ 
-			printf(", ");
+			fprintf(outFile,", ");
 			getToken();
 		}
 		else if(curType != LEX_RPAREN) 
 		{
-			printf("Expected a comma\t %s\n", curTok.tok_str);
-			exit(-1);
+			parseFail("Expected a comma");
 		}
 	}
 	getToken();
@@ -155,13 +153,13 @@ void parseFuncDecl()
 	// Parse the function body
 	addFunc(tempName, newFunc);
 	parseEat(LEX_LBRACK);
-	printf(")\n{\n");
+	fprintf(outFile,")\n{\n");
 	indentation++;
 	parseDecls();
 	parseStmts();
 	parseEat(LEX_RBRACK);
 	indentation--;
-	printf("\n}\n\n");
+	fprintf(outFile,"\n}\n\n");
 
 }
 
@@ -171,12 +169,12 @@ void parsePgm()
 
 	parseEat(LEX_LBRACK);
 	curScope = 0;
-	printf("int main() {\n\n");
+	fprintf(outFile,"int main() {\n\n");
 	indentation = 1;
 	parseDecls();
 
 	parseStmts();
-	printf("\treturn 0;\n}\n");
+	fprintf(outFile,"\treturn 0;\n}\n");
 }
 
 void parseDecls()
@@ -203,20 +201,20 @@ void parseDecl()
 	{
 		case LEX_INT:
 			indent();
-			printf("int ");
+			fprintf(outFile,"int ");
 			type = TYPE_INT;
 			rOpt1 = rOpt2 = LEX_NUM;
 			break;
 		case LEX_CHARDEC:
 			indent();
-			printf("char ");
+			fprintf(outFile,"char ");
 			type = TYPE_CHAR;
 			rOpt1 = LEX_CHAR;
 			rOpt2 = LEX_NUM;
 			break;
 		case LEX_STRDEC:
 			indent();
-			printf("char* ");
+			fprintf(outFile,"char ");
 			type = TYPE_STR;
 			rOpt1 = rOpt2 = LEX_STRING;
 			break;
@@ -231,12 +229,12 @@ void parseDecl()
 	if(curType == LEX_STRDEC) {
 		getToken();
 		parseAssert(LEX_IDENT);
-		printf("%s = malloc(100)", curTok.tok_str);
+		fprintf(outFile,"%s[%d]", curTok.tok_str, MAX_TOK);
 	}
 	else {
 		getToken();
 		parseAssert(LEX_IDENT);
-		printf("%s = 0", curTok.tok_str);
+		fprintf(outFile,"%s = 0", curTok.tok_str);
 	}
 
 	addVar(curTok.tok_str, type);
@@ -250,14 +248,14 @@ void parseDecl()
 
 		parseAssert(LEX_IDENT);
 		if(type != TYPE_STR)
-			printf(", %s = 0 ", curTok.tok_str);
+			fprintf(outFile,", %s = 0 ", curTok.tok_str);
 		else
-			printf(", *%s = 0 ", curTok.tok_str);
+			fprintf(outFile,", %s[%d]", curTok.tok_str, MAX_TOK);
 		addVar(curTok.tok_str, type);
 		getToken();
 	}
 
-	printf(";\n");
+	fprintf(outFile,";\n");
 	parseEat(LEX_SEMICOLON);
 }
 
@@ -265,7 +263,7 @@ void parseStruct()
 {
 	char structName[100];
 	parseEat(LEX_STRUCT);
-	printf("struct %s {\n", curTok.tok_str);
+	fprintf(outFile,"struct %s {\n", curTok.tok_str);
 	indentation++;
 
 	// Get the struct name from the next token
@@ -299,28 +297,27 @@ void parseStruct()
 		{
 			case LEX_INT:
 				indent();
-				printf("\tint ");
+				fprintf(outFile,"\tint ");
 				type = TYPE_INT;
 				break;
 			case LEX_CHARDEC:
 				indent();
-				printf("\tchar ");
+				fprintf(outFile,"\tchar ");
 				type = TYPE_CHAR;
 				break;
 			case LEX_STRDEC:
 				indent();
-				printf("\tchar* ");
+				fprintf(outFile,"\tchar ");
 				type = TYPE_STR;
 				break;
 			case LEX_STRUCT:
 				indent();
 				getToken();
 				temp = getStruct(curTok.tok_str);
-				printf("\tstruct %s ", curTok.tok_str);
+				fprintf(outFile,"\tstruct %s ", curTok.tok_str);
 				if(temp == 0)
 				{
-					printf("Error: undefined variable %s in struct body\n", curTok.tok_str);
-					exit(-1);
+					parseFail("Undefined variable in struct body\n");
 				}
 				type = temp->type;
 				break;
@@ -334,7 +331,9 @@ void parseStruct()
 		getToken();
 		parseAssert(LEX_IDENT);
 		addMember(newDef, curTok.tok_str, type);
-		printf("%s", curTok.tok_str);
+		fprintf(outFile, "%s", curTok.tok_str);
+		if(type == TYPE_STR)
+			fprintf(outFile, "[%d]", MAX_TOK);
 		//printf("add member %s to struct %s. Type %s\n", 
 			//curTok.tok_str, structName, tokens_names[curType]);
 		getToken();
@@ -343,17 +342,17 @@ void parseStruct()
 		while(curTok.tok_type == LEX_COMMA)
 		{
 			getToken();
-			printf(", %s ", curTok.tok_str);
+			fprintf(outFile, ", %s ", curTok.tok_str);
 			parseAssert(LEX_IDENT);
 			addMember(newDef, curTok.tok_str, type);
 			//printf("add member to struct %s: %s. Type %s\n", 
 			//	structName, curTok.tok_str, tokens_names[curType]);
 			getToken();
 		}
-		printf(";\n");
+		fprintf(outFile, ";\n");
 		parseEat(LEX_SEMICOLON);
 	}
-	printf("};\n\n");
+	fprintf(outFile, "};\n\n");
 	indentation--;
 	parseEat(LEX_RBRACK);
 	parseEat(LEX_SEMICOLON);
@@ -374,13 +373,13 @@ void parseStructInit()
 	struct structDef* prototype = getStruct(curTok.tok_str);
 	if(prototype == 0)
 	{
-		printf("Undefined structure: %s\n", curTok.tok_str);
+		fprintf(stderr, "Undefined structure: %s\n", curTok.tok_str);
 		exit(-1);
 	}
 	indent();
-	printf("struct %s ", curTok.tok_str);
+	fprintf(outFile, "struct %s ", curTok.tok_str);
 	getToken();
-	printf("%s;\n", curTok.tok_str);
+	fprintf(outFile, "%s;\n", curTok.tok_str);
 	
 	addVar(curTok.tok_str, prototype->type);
 	getToken();
@@ -396,6 +395,7 @@ void parseStmts()
 			|| curType == LEX_READ
 			|| curType == LEX_EXIT
 			|| curType == LEX_CALL
+			|| curType == LEX_COPY
 			|| curType == LEX_RETURN)
 	{
 		parseStmt();
@@ -439,7 +439,12 @@ void parseStmt()
 		indent();
 		parseCall();
 		parseEat(LEX_SEMICOLON);
-		printf(";\n");
+		fprintf(outFile, ";\n");
+	}
+
+	else if(curType == LEX_COPY)
+	{
+		parseCopy();
 	}
 	
 	else if(curType == LEX_RETURN)
@@ -457,22 +462,22 @@ void parseWhile()
 	parseEat(LEX_WHILE);
 	parseEat(LEX_LPAREN);
 	indent();
-	printf("while(");
+	fprintf(outFile, "while(");
 	indentation++;
 	
 	parseExpr();
 
-	printf(") {\n");
+	fprintf(outFile, ") {\n");
 	parseEat(LEX_RPAREN);
 	parseEat(LEX_LBRACK);
 		
 	parseStmts();
 	
 	parseEat(LEX_RBRACK);
-	printf("\n");
+	fprintf(outFile, "\n");
 	indentation--;
 	indent();
-	printf("}\n");
+	fprintf(outFile, "}\n");
 }
 
 void parseIf()
@@ -481,10 +486,10 @@ void parseIf()
 	parseEat(LEX_IF);
 	parseEat(LEX_LPAREN);
 	indent();
-	printf("if( ");
+	fprintf(outFile, "if( ");
 	parseExpr();
 	parseEat(LEX_RPAREN);
-	printf(") {\n");
+	fprintf(outFile, ") {\n");
 	indentation++;
 
 	// Parse If Body
@@ -492,9 +497,9 @@ void parseIf()
 	parseStmts();
 	parseEat(LEX_RBRACK);
 	indentation--;
-	printf("\n");
+	fprintf(outFile, "\n");
 	indent();
-	printf("}\n");
+	fprintf(outFile, "}\n");
 
 	// Optional else statement
 	if(curType == LEX_ELSE)
@@ -502,14 +507,14 @@ void parseIf()
 		getToken();
 		parseEat(LEX_LBRACK);
 		indent();
-		printf("else {\n");
+		fprintf(outFile, "else {\n");
 		indentation++;
 		parseStmts();
 		parseEat(LEX_RBRACK);
-		printf("\n");
+		fprintf(outFile, "\n");
 		indentation--;
 		indent();
-		printf("}\n");
+		fprintf(outFile, "}\n");
 	}
 }
 
@@ -518,24 +523,24 @@ void parseAssn()
 	int type = getVar(curTok.tok_str);
 	if(type == 0)
 	{
-		printf("Error: Variable %s undeclared\n", curTok.tok_str);
+		fprintf(stderr, "Error: Variable %s undeclared\n", curTok.tok_str);
 		exit(-1);
 	}
 
 	indent();
-	printf("%s ", curTok.tok_str);
+	fprintf(outFile, "%s ", curTok.tok_str);
 	getToken();
 
 	while(curType == LEX_DOT)
 	{
-		printf(".");
+		fprintf(outFile, ".");
 		if(type == 0) {
 			parseFail("Struct has no such member\n");
 		}
 		
 		getToken();
 		parseAssert(LEX_IDENT);
-		printf("%s", curTok.tok_str);
+		fprintf(outFile, "%s", curTok.tok_str);
 		type = getStructMember(type , curTok.tok_str);
 		getToken();
 	}	
@@ -547,11 +552,11 @@ void parseAssn()
 		case LEX_MINEQ:
 		case LEX_MULEQ:
 		case LEX_DIVEQ:
-			printf(" %s ", curTok.tok_str);
+			fprintf(outFile, " %s ", curTok.tok_str);
 			getToken();
 			break;
 		default:
-			printf("%s\n", curTok.tok_str);
+			fprintf(outFile, "%s\n", curTok.tok_str);
 			errMsg("Expected assignment statement");
 	}
 
@@ -574,27 +579,17 @@ void parseAssn()
 			parseAssert(LEX_CHAR);
 		}
 	
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile, " %s ", curTok.tok_str);
+
 		getToken();
 	}
 
 	else if(type == TYPE_STR)
 	{
-		if(curType == LEX_IDENT)
-		{
-			if(getVar(curTok.tok_str) != TYPE_STR)
-			{
-				parseFail("Assignment to string from incompatible type");
-			}
-		}
-		else {
-			parseAssert(LEX_STRING);
-		}
-		printf(" %s ", curTok.tok_str);
-		getToken();
+		parseFail("Strings are non-assignable. Use copy() to change string values");
 	}
 
-	printf(";\n");
+	fprintf(outFile, ";\n");
 	parseEat(LEX_SEMICOLON);
 }
 
@@ -610,11 +605,11 @@ void parseCall()
 
 	if(curFunc == 0)
 	{
-		printf("Undefined function\n");
+		fprintf(stderr, "Undefined function\n");
 		exit(-1);
 	}
 	
-	printf("%s(", curTok.tok_str);
+	fprintf(outFile, "%s(", curTok.tok_str);
 	getToken();
 	parseEat(LEX_LPAREN);
 	int index = 0;
@@ -626,10 +621,9 @@ void parseCall()
 		if(curType == LEX_STRING || 
 			(curType == LEX_IDENT && curVarType == TYPE_STR))
 		{
-			//do type check
 			if(curFunc->argTypes[index] != TYPE_STR) 
 				parseFail("unexpected string in function call");
-			printf("%s", curTok.tok_str);
+			fprintf(outFile, "%s", curTok.tok_str);
 			getToken();
 		}
 		else if(curType == LEX_CHAR ||
@@ -640,7 +634,7 @@ void parseCall()
 				parseFail(" unexpected char in function call");
 			}
 
-			printf("%s", curTok.tok_str);
+			fprintf(outFile, "%s", curTok.tok_str);
 			getToken();
 		}
 
@@ -648,10 +642,10 @@ void parseCall()
 		{
 			if(curVarType != curFunc->argTypes[index])
 			{
-				printf("Current function does not call for struct of type %s\n", curTok.tok_str);
+				fprintf(stderr, "Current function does not call for struct of type %s\n", curTok.tok_str);
 				exit(-1);
 			}
-			printf("%s", curTok.tok_str);
+			fprintf(outFile, "%s", curTok.tok_str);
 			getToken();
 		}
 
@@ -664,29 +658,104 @@ void parseCall()
 
 		if(curType == LEX_COMMA)
 		{
-			printf(", ");
+			fprintf(outFile, ", ");
 			getToken();
 		}
 		else if(curType != LEX_RPAREN)
 		{
-			printf("expectd a comma\n");
+			fprintf(stderr, "expectd a comma\n");
 			exit(-1);
 		}
 		index++;
 	}
 
 	parseEat(LEX_RPAREN);
-	printf(")");
+	fprintf(outFile, ")");
 }
 
 void parseReturn()
 {
 	parseEat(LEX_RETURN);
 	indent();
-	printf("return ");
+	fprintf(outFile, "return ");
 	parseExpr();
 	parseEat(LEX_SEMICOLON);
-	printf(";\n");
+	fprintf(outFile, ";\n");
+}
+
+void parseVar(int* type, char* nameBuff)
+{
+	int buffInd = 0;
+	parseAssert(LEX_IDENT);
+	strcpy(nameBuff, curTok.tok_str);
+	buffInd += strlen(curTok.tok_str);
+
+	*type = getVar(curTok.tok_str);
+	if(*type == 0)
+	{
+		parseFail("unknown member");
+	}
+	
+	getToken();
+
+	while(curType == LEX_DOT)
+	{
+		nameBuff[buffInd++] = '.';
+		getToken();
+		parseAssert(LEX_IDENT);
+		strcpy(nameBuff + buffInd, curTok.tok_str);
+		*type = getStructMember(*type, curTok.tok_str);
+		if(*type == 0)
+		{
+			parseFail("Unknown member");
+		}
+
+		buffInd += strlen(curTok.tok_str);
+		getToken();
+	}
+}
+
+void parseCopy()
+{
+	char buff[MAX_TOK];
+	int type;
+
+	parseEat(LEX_COPY);
+	parseEat(LEX_LPAREN);
+	indent();
+	fprintf(outFile, "strcpy(");
+	parseAssert(LEX_IDENT);
+
+	parseVar(&type, &buff[0]);
+
+	if(type != TYPE_STR)
+	{
+		parseFail("Only strings can be copied");
+	}
+
+	fprintf(outFile, "%s, ", buff);
+
+	parseEat(LEX_COMMA);
+	if(curType == LEX_STRING)
+	{
+		fprintf(outFile, "%s", curTok.tok_str);
+		getToken();
+	}
+	
+	else
+	{
+		parseAssert(LEX_IDENT);
+		parseVar(&type, &buff[0]);
+		if(type != TYPE_STR)
+		{
+			parseFail("Only strings can be copied");
+		}
+		fprintf(outFile, "%s", buff);
+	}
+
+	fprintf(outFile, ");\n");
+
+	parseEat(LEX_RPAREN);
 }
 
 void parsePrint()
@@ -704,7 +773,7 @@ void parsePrint()
 
 	if(curTok.tok_type == LEX_RPAREN)
 	{
-		printf("print() must be called with at least one argument\n");
+		fprintf(stderr, "print() must be called with at least one argument\n");
 		exit(-1);
 	}
 
@@ -714,7 +783,7 @@ void parsePrint()
 		argC++;
 		if(argC > MAX_ARGS)
 		{
-			printf("Too many arguments to print()\n");
+			fprintf(stderr,"Too many arguments to print()\n");
 			exit(-1);
 		}
 		
@@ -723,7 +792,7 @@ void parsePrint()
 		int tempType = getVar(curTok.tok_str);
 		if(curType == LEX_IDENT && getVar(curTok.tok_str) > TYPE_CHAR)
 		{
-			strcpy(&tmpBuff[0], curTok.tok_str);
+			/*strcpy(&tmpBuff[0], curTok.tok_str);
 			buffIndex += strlen(curTok.tok_str);
 			
 			getToken();
@@ -738,21 +807,22 @@ void parsePrint()
 				buffIndex += strlen(curTok.tok_str);
 				getToken();
 			}
-			tmpBuff[buffIndex + 1] = 0;
+			tmpBuff[buffIndex + 1] = 0;*/
+			parseVar(&tempType, &tmpBuff[0]);
 			indent();
 			if(tempType == TYPE_INT)
 			{
-				printf("int %s = %s;\n", tmpName, tmpBuff);
+				fprintf(outFile, "int %s = %s;\n", tmpName, tmpBuff);
 				addVar(tmpName, TYPE_INT);
 			}
 			else if(tempType == TYPE_CHAR)
 			{
-				printf("char %s = %s;\n", tmpName, tmpBuff);
+				fprintf(outFile, "char %s = %s;\n", tmpName, tmpBuff);
 				addVar(tmpName, TYPE_CHAR);
 			}
 			else if(tempType == TYPE_STR)
 			{
-				printf("char* %s = %s;\n", tmpName, tmpBuff);
+				fprintf(outFile, "char* %s = %s;\n", tmpName, tmpBuff);
 				addVar(tmpName, TYPE_STR);
 			}
 		}
@@ -768,17 +838,17 @@ void parsePrint()
 			{
 				if(tempType == TYPE_INT) {
 					addVar(tmpName, TYPE_INT);
-					printf("int %s = ", tmpName);
+					fprintf(outFile, "int %s = ", tmpName);
 					parseExpr();
 				}
 				else if(tempType == TYPE_STR) {
 					addVar(tmpName, TYPE_STR);
-					printf("char* %s = %s", tmpName, curTok.tok_str);
+					fprintf(outFile, "char* %s = %s", tmpName, curTok.tok_str);
 					getToken();
 				}
 				else if(tempType == TYPE_CHAR) {
 					addVar(tmpName, TYPE_CHAR);
-					printf("char %s = %s", tmpName, curTok.tok_str);
+					fprintf(outFile, "char %s = %s", tmpName, curTok.tok_str);
 					getToken();
 				}
 				else {
@@ -786,41 +856,41 @@ void parsePrint()
 				}
 			}
 			else {
-				printf("int %s = ", tmpName);
+				fprintf(outFile, "int %s = ", tmpName);
 				parseExpr();
 				addVar(tmpName, TYPE_INT);
 			}
 
 
-			printf(";\n");
+			fprintf(outFile, ";\n");
 		}
 		else if(curType == LEX_CALL)
 		{
 			indent();
-			printf("int %s = ", tmpName);
+			fprintf(outFile, "int %s = ", tmpName);
 			addVar(tmpName, TYPE_INT);
 			parseCall();
-			printf(";\n");
+			fprintf(outFile, ";\n");
 		}
 		else if(curType == LEX_STRING)
 		{
 			addVar(tmpName, TYPE_STR);
 			indent();
-			printf("char* %s = ", tmpName);
-			printf("%s;\n", curTok.tok_str);
+			fprintf(outFile, "char* %s = ", tmpName);
+			fprintf(outFile, "%s;\n", curTok.tok_str);
 			getToken();
 		}
 		else if(curType == LEX_CHAR)
 		{
 			addVar(tmpName, TYPE_CHAR);
 			indent();
-			printf("char %s = ", tmpName);
-			printf("%s;\n", curTok.tok_str);
+			fprintf(outFile, "char %s = ", tmpName);
+			fprintf(outFile, "%s;\n", curTok.tok_str);
 			getToken();
 		}
 
 		else {
-			printf("invalid parameter type\n");
+			fprintf(outFile, "invalid parameter type\n");
 			exit(-1);
 		}
 	
@@ -831,24 +901,24 @@ void parsePrint()
 		}
 	}
 	indent();
-	printf("printf(\"");
+	fprintf(outFile, "printf(\"");
 	for( int i = argStart; i < tmpArgs; i++)
 	{
 		sprintf(tmpName, "temp%d", i);
 		printFormatToken(getVar(tmpName));
 	}
-	printf("\",");
+	fprintf(outFile, "\",");
 
 	for(int i = argStart; i < tmpArgs; i++)
 	{
 		sprintf(tmpName, "temp%d", i);
-		printf("%s", tmpName);
+		fprintf(outFile, "%s", tmpName);
 		if(i < tmpArgs - 1)
 		{
-			printf(", ");
+			fprintf(outFile, ", ");
 		}
 	}
-	printf(");\n");
+	fprintf(outFile, ");\n");
 
 	parseEat(LEX_RPAREN);
 	if(curTok.tok_type == LEX_SEMICOLON) {
@@ -869,7 +939,7 @@ void parseRead()
 	// Check that read() has at least one argument
 	if(curTok.tok_type == LEX_RPAREN)
 	{
-		printf("read() must be called with at least one argument\n");
+		fprintf(stderr, "read() must be called with at least one argument\n");
 		exit(-1);
 	}
 
@@ -886,7 +956,7 @@ void parseRead()
 		// Check upper bound on input args
 		if(argCount > MAX_ARGS)
 		{
-			printf("Too many arguments to read()\n");
+			fprintf(stderr, "Too many arguments to read()\n");
 			exit(-1);
 		}
 
@@ -895,7 +965,7 @@ void parseRead()
 		// Check that the current variable exists
 		if(curVarType == 0)
 		{
-			printf("variable %s undeclared\n", curTok.tok_str);
+			parseFail("Undeclared variable\n");
 			exit(-1);
 		}
 
@@ -928,26 +998,28 @@ void parseRead()
 
 		else {
 			moreVars = 0;
-		}	
+		}
 	}
-
 
 	parseEat(LEX_RPAREN);
 	
-	printf("scanf(\"");
+	// Write out the format tokens
+	fprintf(outFile, "scanf(\"");
 	for(int i = 0; i < argCount; i++) {
 		printFormatToken(argTypes[i]);
 	}
-	printf("\"");
+	fprintf(outFile, "\"");
+	
+	// Write out the variable list
 	for(int i = 0; i < argCount; i++) {
 		if(argTypes[i] == TYPE_STR)
-			parseFail("String variables cannot be read");
+			fprintf(outFile, ",%s", argList[i]);
 		else
-			printf(",&%s", argList[i]);
+			fprintf(outFile, ",&%s", argList[i]);
 		free(argList[i]);
 	}
 
-	printf(");\n");
+	fprintf(outFile, ");\n");
 
 	if(curTok.tok_type == LEX_SEMICOLON) {
 		parseFail("read statements do not end with a semicolon!\n");
@@ -959,16 +1031,16 @@ void printFormatToken(int type)
 	switch(type)
 	{
 		case TYPE_INT:
-			printf("%%d");
+			fprintf(outFile, "%%d");
 			break;
 		case TYPE_CHAR:
-			printf("%%c");
+			fprintf(outFile," %%c");
 			break;
 		case TYPE_STR:
-			printf("%%s");
+			fprintf(outFile,"%%s");
 			break;
 		default:
-			printf("Type %d cannot be printed\n", type);
+			fprintf(outFile,"Type %d cannot be printed\n", type);
 			exit(-1);
 	}
 }
@@ -978,10 +1050,10 @@ void parseExit()
 	getToken();
 	parseEat(LEX_LPAREN);
 	indent();
-	printf("exit(");
+	fprintf(outFile,"exit(");
 	parseExpr();
 	parseEat(LEX_RPAREN);
-	printf(");\n");
+	fprintf(outFile,");\n");
 }
 
 void parseExpr()
@@ -990,7 +1062,7 @@ void parseExpr()
 	while(curTok.tok_type == LEX_AND
 		|| curTok.tok_type == LEX_OR)
 	{
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile," %s ", curTok.tok_str);
 		getToken();
 		parseComp();
 	}
@@ -1005,7 +1077,7 @@ void parseComp()
 		|| curTok.tok_type == LEX_LEQ
 		|| curTok.tok_type == LEX_EQ)
 	{
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile," %s ", curTok.tok_str);
 		getToken();
 		parseAddn();
 	}
@@ -1017,7 +1089,7 @@ void parseAddn()
 	while(curTok.tok_type == LEX_PLUS
 		|| curTok.tok_type == LEX_MIN)
 	{
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile," %s ", curTok.tok_str);
 		getToken();
 		parseMuln();
 	}
@@ -1029,7 +1101,7 @@ void parseMuln()
 	while(curTok.tok_type == LEX_MUL
 		|| curTok.tok_type == LEX_DIV)	
 	{
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile," %s ", curTok.tok_str);
 		getToken();
 		parseTerm();
 	}
@@ -1041,10 +1113,9 @@ void parseTerm()
 	{
 		int type = getVar(curTok.tok_str);
 		if(type == 0) {
-			printf("Error: undeclared variable %s\n", curTok.tok_str);
-			exit(-1);
+			parseFail("Error: undeclared variable\n");
 		}
-		printf(" %s ", curTok.tok_str);
+		fprintf(outFile," %s ", curTok.tok_str);
 
 		getToken();
 
@@ -1053,12 +1124,12 @@ void parseTerm()
 			getToken();
 			if(type == 0)
 			{
-				printf("struct has no member \"%s\"\n", curTok.tok_str);
+				parseFail("struct has no such member");
 				exit(-1);
 			}
 
 			type = getStructMember(type, curTok.tok_str);
-			printf(".%s", curTok.tok_str);
+			fprintf(outFile,".%s", curTok.tok_str);
 
 			//printf("\t.%s\n", curTok.tok_str);
 			//printf("type: "); printTypeByID(type); printf("\n");
@@ -1070,7 +1141,7 @@ void parseTerm()
 
 	else if( curType == LEX_NUM )
 	{
-		printf("%s", curTok.tok_str);
+		fprintf(outFile,"%s", curTok.tok_str);
 		getToken();
 		return;
 	}
@@ -1083,9 +1154,9 @@ void parseTerm()
 	else
 	{
 		parseEat(LEX_LPAREN);
-		printf("(");
+		fprintf(outFile,"(");
 		parseExpr();
 		parseEat(LEX_RPAREN);
-		printf(")");
+		fprintf(outFile,")");
 	}
 }

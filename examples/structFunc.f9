@@ -31,19 +31,23 @@ program
 	c1 = 'a';
 	c2 = c1;
 
-	s1 = "a";
-	s2 = s1;
+	//s1 = "a";
+	//s2 = s1;
 	
 	i1 = 1+2+1+1;
 	i2 = i1;
+
+	copy(s2, "words")
+	copy(s1, s2)
+	copy(b.s, s1)
 	
-	b.s = "hellot";
+	//b.s = "hellot";
 	
 	b.c = 'a';
 
 	b.i = 1+1+1*(12*12);
 
 	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n', call::retZero(), 1, 1+2+2+2)
-	read(c1, i1, b.i, b.c)
-	print("c1 ", c1, "i1 ", i1, "b.i: ", b.i, " b.c: ", b.c, '\n')
+	read(c1, i1, b.i, b.c, b.s, s1)
+	print("c1: ", c1, "\ni1: ", i1, "\nb.i: ", b.i, "\nb.c: ", b.c, '\n')
 }

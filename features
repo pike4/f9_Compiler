@@ -2,7 +2,11 @@ This compiler implements all features specified in f9.txt. Additionally, it incl
 
 char and string datatypes:
 	char variables are declared using the 'char' keyword. Characters can be assigned using char literals in single quotes or other char variables
-	string variables are declared using the 'string keyword. Strings are assigned using string variables in double quotes or other string variables
+	string variables are declared using the 'string' keyword. Strings cannot be assigned, as other variables
+
+Copy()
+	The copy function takes one string variable and one string literal or string variable and copies the string value of the second argument to the first.
+	All string variables are assigned this way. 
 
 Structs:
 	Structs are declared before the main function using the "struct" keyword. They can contain int, char, string, or previously defined structs as member variables.
@@ -30,7 +34,7 @@ Return:
 	Functions can be terminated using the "return" keyword. Return can only be used within a function. Any invocation of return in the main method will result in a compile-time error
 
 Print:
-	parsePrint() has been altered to accept arguments of type char, string, and struct, as well as string and character literals
+	parsePrint() has been altered to accept arguments of type char, string, and primitive-typed struct members, as well as string and character literals
 
 Read:
-	parseRead() does not yet allow arguments of a type other than int
+	parseRead() has been altered to accept types of int, char, string, and primitive-typed struct members

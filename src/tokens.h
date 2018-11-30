@@ -48,6 +48,7 @@
 #define LEX_CALL 47
 #define LEX_COLON 48
 #define LEX_RETURN 49
-#define NUM_TOKENS 50
+#define LEX_COPY 50
+#define NUM_TOKENS 51
 
-char* tokens_names[51];
+char* tokens_names[52];

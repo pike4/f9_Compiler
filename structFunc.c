@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<string.h>
 
 struct test {
 		int a;
@@ -28,16 +29,15 @@ int fun (struct test  a)
 int main() {
 
 	char c1 = 0, c2 = 0 ;
-	char* s1 = malloc(100), *s2 = 0 ;
+	char s1[50], s2[50];
 	int i1 = 0, i2 = 0 ;
 	struct badType b;
 	c1  =  'a' ;
 	c2  =  c1 ;
-	s1  =  "a" ;
-	s2  =  s1 ;
 	i1  = 1 + 2 + 1 + 1;
 	i2  =  i1 ;
-	b .s =  "hellot" ;
+	strcpy(s1, s2);
+	strcpy(b.s, s1);
 	b .c =  'a' ;
 	b .i = 1 + 1 + 1 * (12 * 12);
 	char* temp1 = "b.i: ";
@@ -51,7 +51,7 @@ int main() {
 	int temp9 = 1;
 	int temp10 = 1 + 2 + 2 + 2;
 	printf("%s%d%s%c%s%s%c%d%d%d",temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10);
-	scanf("%c%d%d%c",&c1,&i1,&b.i,&b.c);
+	scanf("%c%d%d%c%s%s",&c1,&i1,&b.i,&b.c,b.s,s1);
 	char* temp11 = "c1 ";
 	char temp12 = c1;
 	char* temp13 = "i1 ";
