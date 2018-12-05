@@ -3,12 +3,13 @@ function foo(int a, char b, string c)
 	int y;
 	int u;
 	u = y;
+	return 9;
 }
 
 function bar(int a, char b, int c)
 {
 	string h;
-	if(a < b)
+	if(a > 10)
 	{
 		c = 3;
 		return c;
@@ -16,8 +17,11 @@ function bar(int a, char b, int c)
 	else
 	{
 		c = call::foo(1+2, '1', "1+2");
+		print(c, "\n")
 		c = call::foo(a, b, h);
+		print(c, '\n')
 		c = call::foo(call::foo(1, 'a', "a"), 'a', "a");
+		print(c, '\n')
 		return c + 1;
 	}
 }
@@ -25,6 +29,6 @@ function bar(int a, char b, int c)
 program
 {
 	int q;
-	q = 0;
+	q = call::bar(1, '0', 1);
 	exit(1)
 }

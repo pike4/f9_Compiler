@@ -47,7 +47,9 @@ program
 
 	b.i = 1+1+1*(12*12);
 
-	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n', call::retZero(), 1, 1+2+2+2)
+	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n')
+	print("Enter c1: char, i1: int, b.i:")
+	print(" int, b.c:char, b.s:string, s1:string")
 	read(c1, i1, b.i, b.c, b.s, s1)
-	print("c1: ", c1, "\ni1: ", i1, "\nb.i: ", b.i, "\nb.c: ", b.c, '\n')
+	print("c1:\t", c1, "\ni1:\t", i1+1, "\nb.i:\t", b.i, "\nb.c:\t", b.c, "\nb.s\t", b.s, "\ns1\t", s1, '\n')
 }

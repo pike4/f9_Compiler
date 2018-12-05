@@ -616,54 +616,78 @@ void parseCall()
 	
 	while(curType != LEX_RPAREN)
 	{
-		int curVarType;
+		int curVarType = getVar(curTok.tok_str);
 		char name[200];
-		parseVar(&curVarType, &name[0]);
-
-		if( curVarType == TYPE_STR )
+		if( curVarType > 3)
 		{
-			if(curFunc->argTypes[index] != TYPE_STR) 
-				parseFail("unexpected string in function call");
-			fprintf(outFile, "%s", name);
-		}
-		else if( curVarType == TYPE_CHAR )
-		{
-			if(curFunc->argTypes[index] != TYPE_CHAR)
+			//do struct
+			parseVar(&curVarType, &name[0]);
+			if( curType == LEX_IDENT)
 			{
-				parseFail(" unexpected char in function call");
+				if(curVarType != curFunc->argTypes[index])
+				{
+					fprintf(stderr, "Current function does not call for struct of type %s\n", curTok.tok_str);
+					exit(-1);
+				}
+
+				fprintf(outFile, "%s", curTok.tok_str);
+				getToken();
 			}
 
-			fprintf(outFile, "%s", name);
-		}
-
-		else if( curVarType != TYPE_INT )
-		{
-			if(curVarType != curFunc->argTypes[index])
-			{
-				fprintf(stderr, "Current function does not call for struct of type %s\n", curTok.tok_str);
-				exit(-1);
-			}
-			fprintf(outFile, "%s", name);
 		}
 
 		else
 		{
-			if(curFunc->argTypes[index] != TYPE_INT)
-				parseFail("unexpected int in fuction call");
-			parseExpr();
-		}
+			if( curVarType == TYPE_STR  || (curType == LEX_STRING ))
+			{
+				if(curFunc->argTypes[index] != TYPE_STR) 
+					parseFail("unexpected string in function call");
 
-		if(curType == LEX_COMMA)
-		{
-			fprintf(outFile, ", ");
-			getToken();
+				fprintf(outFile, "%s", curTok.tok_str);
+				getToken();
+			}
+			else if( curVarType == TYPE_CHAR || (curType == LEX_CHAR))
+			{
+				if(curFunc->argTypes[index] != TYPE_CHAR)
+				{
+					parseFail(" unexpected char in function call");
+				}
+
+				fprintf(outFile, "%s", curTok.tok_str);
+				getToken();
+			}
+
+			else if( curVarType != TYPE_INT && curType == LEX_IDENT)
+			{
+				if(curVarType != curFunc->argTypes[index])
+				{
+					fprintf(stderr, "Current function does not call for struct of type %s\n", curTok.tok_str);
+					exit(-1);
+				}
+
+				fprintf(outFile, "%s", curTok.tok_str);
+				getToken();
+			}
+
+			else
+			{
+				if(curFunc->argTypes[index] != TYPE_INT)
+					parseFail("unexpected int in fuction call");
+				parseExpr();
+			}
+
+			if(curType == LEX_COMMA)
+			{
+				fprintf(outFile, ", ");
+				getToken();
+			}
+			else if(curType != LEX_RPAREN)
+			{
+				fprintf(stderr, "expectd a comma: %s\n", curTok.tok_str);
+				exit(-1);
+			}
+			index++;
 		}
-		else if(curType != LEX_RPAREN)
-		{
-			fprintf(stderr, "expectd a comma: %s\n", curTok.tok_str);
-			exit(-1);
-		}
-		index++;
 	}
 
 	parseEat(LEX_RPAREN);
@@ -682,31 +706,13 @@ void parseReturn()
 
 void parseVar(int* type, char* nameBuff)
 {
+	if(curType != LEX_IDENT)
+	{
+		*type = -1;
+		return;
+	}
+	
 	int buffInd = 0;
-
-	if(curType == LEX_STRING)
-	{
-		strcpy(nameBuff, curTok.tok_str);
-		*type = TYPE_STR;
-		getToken();
-		return;
-	}
-
-	if(curType == LEX_NUM)
-	{
-		parseExpr();
-		*type = TYPE_INT;
-		return;
-	}
-
-	if(curType == LEX_CHAR)
-	{
-		strcpy(nameBuff, curTok.tok_str);
-		*type = TYPE_CHAR;
-		getToken();
-		return;
-	}
-
 	parseAssert(LEX_IDENT);
 	strcpy(nameBuff, curTok.tok_str);
 	buffInd += strlen(curTok.tok_str);
@@ -1107,6 +1113,7 @@ void parseComp()
 void parseAddn()
 {
 	parseMuln();
+	
 	while(curTok.tok_type == LEX_PLUS
 		|| curTok.tok_type == LEX_MIN)
 	{
