@@ -1,53 +1,33 @@
-struct test
+struct inner
 {
-	int a;
-	int b;
+	int a, b;
 };
 
-struct badType
+struct outer
 {
-	char c;
-	string s;
-	int i;
+	struct inner i;
+	int g;
 };
 
-function retZero()
+function add2(struct inner i)
 {
-	return 0;
+	return i.a + i.b;
 }
 
-function fun(struct test a)
+function add3(struct outer o)
 {
-	print(a.a)
+	return o.i.a + o.i.b + o.g;
 }
 
 program
-{	
-	char c1, c2;
-	string s1, s2;
-	int i1, i2;
-	struct badType b;
+{
+	struct outer st1;
+	st1.i.a = 1;
+	st1.i.b = 3;
+	st1.g = 4;
 
-	c1 = 'a';
-	c2 = c1;
-
-	//s1 = "a";
-	//s2 = s1;
-	
-	i1 = 1+2+1+1;
-	i2 = i1;
-
-	copy(s2, "words")
-	copy(s1, s2)
-	copy(b.s, s1)
-	
-	//b.s = "hellot";
-	
-	b.c = 'a';
-
-	b.i = 1+1+1*(12*12);
-
-	print("b.i: ", b.i, " b.c: ", b.c, " b.s: ", b.s, '\n', call::retZero(), 1, 1+2+2+2)
-	read(c1, i1, b.i, b.c, b.s, s1)
-	print("c1: ", c1, "\ni1: ", i1, "\nb.i: ", b.i, "\nb.c: ", b.c, '\n')
+	call::add3(st1);
+		
+	print("st1.i.a: ", st1.i.a, "; st1.i.b: ", st1.i.b, "; st1.g: ", st1.g)
+	print("\nAdd2: ",  call::add2(st1.i), "; Add3: ", call::add3(st1), "\n")
 }

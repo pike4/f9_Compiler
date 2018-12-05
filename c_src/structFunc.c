@@ -2,66 +2,46 @@
 #include <stdlib.h>
 #include<string.h>
 
-struct test {
-		int a;
-		int b;
+struct inner {
+		int a, b ;
 };
 
-struct badType {
-		char c;
-		char s[50];
-		int i;
+struct outer {
+		struct inner i;
+		int g;
 };
 
-int retZero ()
+int add2 (struct inner  i)
 {
-	return 0;
+	return  i .a +  i .b;
 
 }
 
-int fun (struct test  a)
+int add3 (struct outer  o)
 {
-	int temp0 = a.a;
-	printf("%d",temp0);
+	return  o .i.a +  o .i.b +  o .g;
 
 }
 
 int main() {
 
-	char c1 = 0, c2 = 0 ;
-	char s1[50], s2[50];
-	int i1 = 0, i2 = 0 ;
-	struct badType b;
-	c1  =  'a' ;
-	c2  =  c1 ;
-	i1  = 1 + 2 + 1 + 1;
-	i2  =  i1 ;
-	strcpy(s2, "words");
-	strcpy(s1, s2);
-	strcpy(b.s, s1);
-	b .c =  'a' ;
-	b .i = 1 + 1 + 1 * (12 * 12);
-	char* temp1 = "b.i: ";
-	int temp2 = b.i;
-	char* temp3 = " b.c: ";
-	char temp4 = b.c;
-	char* temp5 = " b.s: ";
-	char* temp6 = b.s;
-	char temp7 = '\n';
-	int temp8 = retZero();
-	int temp9 = 1;
-	int temp10 = 1 + 2 + 2 + 2;
-	printf("%s%d%s %c%s%s %c%d%d%d",temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10);
-	scanf(" %c%d%d %c%s%s",&c1,&i1,&b.i,&b.c,b.s,s1);
-	char* temp11 = "c1: ";
-	char temp12 = c1;
-	char* temp13 = "\ni1: ";
-	int temp14 =  i1 ;
-	char* temp15 = "\nb.i: ";
-	int temp16 = b.i;
-	char* temp17 = "\nb.c: ";
-	char temp18 = b.c;
-	char temp19 = '\n';
-	printf("%s %c%s%d%s%d%s %c %c",temp11, temp12, temp13, temp14, temp15, temp16, temp17, temp18, temp19);
+	struct outer st1;
+	st1 .i.a = 1;
+	st1 .i.b = 3;
+	st1 .g = 4;
+	add3(st1);
+	char* temp0 = "st1.i.a: ";
+	int temp1 = st1.i.a;
+	char* temp2 = "; st1.i.b: ";
+	int temp3 = st1.i.b;
+	char* temp4 = "; st1.g: ";
+	int temp5 = st1.g;
+	printf("%s%d%s%d%s%d",temp0, temp1, temp2, temp3, temp4, temp5);
+	char* temp6 = "\nAdd2: ";
+	int temp7 = add2(st1.i);
+	char* temp8 = "; Add3: ";
+	int temp9 = add3(st1);
+	char* temp10 = "\n";
+	printf("%s%d%s%d%s",temp6, temp7, temp8, temp9, temp10);
 	return 0;
 }
